@@ -1,48 +1,36 @@
 package wat.inz.kolektorlogow;
 
-import android.os.Bundle;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.snackbar.Snackbar;
 
-import androidx.appcompat.app.AppCompatActivity;
+import java.awt.Button;
+import java.util.List;
 
-import android.view.View;
+import javax.swing.text.View;
 
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
-import androidx.navigation.ui.AppBarConfiguration;
-import androidx.navigation.ui.NavigationUI;
-
+import jdk.internal.net.http.common.Log;
 import wat.inz.kolektorlogow.databinding.ActivityMainBinding;
 
-import android.view.Menu;
-import android.view.MenuItem;
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
-public class MainActivity extends AppCompatActivity {
+    private Button refreshList;
+    private List<Log> logList = null;
+    private TextView logListTextView;
 
-    private AppBarConfiguration appBarConfiguration;
     private ActivityMainBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        init();
+
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        setSupportActionBar(binding.toolbar);
-
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
-        appBarConfiguration = new AppBarConfiguration.Builder(navController.getGraph()).build();
-        NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
-
-        binding.fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+        binding.refreshList.setOnClickListener(view -> Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                .setAction("Action", null).show());
     }
 
     @Override
@@ -68,9 +56,26 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public boolean onSupportNavigateUp() {
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
-        return NavigationUI.navigateUp(navController, appBarConfiguration)
-                || super.onSupportNavigateUp();
+    public void onClick(View v) {
+        if (v.getId() == R.id.refreshList) {
+            refreshLogList();
+        }
+    }
+
+    @SuppressLint("SetTextI18n")
+    private void refreshLogList() {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (Log log : logList) {
+            stringBuilder.append(log.getLogString()).append("\n");
+        }
+
+        logListTextView.setText("Lista logów: \n\n" + stringBuilder);
+    }
+
+    private void init() {
+        refreshList = findViewById(R.id.refreshList);
+        logListTextView = findViewById(R.id.logList);
+
+        refreshList.setOnClickListener(this);
     }
 }
