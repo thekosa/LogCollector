@@ -1,36 +1,44 @@
 package wat.inz.kolektorlogow;
 
+import android.annotation.SuppressLint;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.snackbar.Snackbar;
 
-import java.awt.Button;
+import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.text.View;
 
-import jdk.internal.net.http.common.Log;
 import wat.inz.kolektorlogow.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private Button refreshList;
-    private List<Log> logList = null;
+    private List<Log> logList = new ArrayList<>();
     private TextView logListTextView;
+    private TextView helloView;
 
     private ActivityMainBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
 
-        init();
+        refreshList = findViewById(R.id.refreshList);
+        logListTextView = findViewById(R.id.logList);
+        helloView=findViewById(R.id.textView);
+        refreshList.setOnClickListener(this);
 
-        binding = ActivityMainBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
 
-        binding.refreshList.setOnClickListener(view -> Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show());
     }
 
     @Override
@@ -66,7 +74,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void refreshLogList() {
         StringBuilder stringBuilder = new StringBuilder();
         for (Log log : logList) {
-            stringBuilder.append(log.getLogString()).append("\n");
+            stringBuilder.append(log.toString()).append("\n");
         }
 
         logListTextView.setText("Lista logów: \n\n" + stringBuilder);
@@ -75,7 +83,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void init() {
         refreshList = findViewById(R.id.refreshList);
         logListTextView = findViewById(R.id.logList);
-
+        helloView=findViewById(R.id.textView);
         refreshList.setOnClickListener(this);
     }
 }
