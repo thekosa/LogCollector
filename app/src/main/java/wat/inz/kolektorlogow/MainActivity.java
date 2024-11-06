@@ -16,6 +16,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -25,6 +26,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private TextView logListTextView;
     private ScrollView scrollViewLogs;
     private TextView commandLine;
+    //private TableView tableView;
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -36,8 +38,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         logListTextView = findViewById(R.id.logList);
         refreshList.setOnClickListener(this);
         scrollViewLogs = findViewById(R.id.scrollViewList);
-commandLine=findViewById(R.id.commandLine);
-
+      //  tableView = findViewById(R.id.tableView);
     }
 
     @Override
@@ -83,18 +84,16 @@ commandLine=findViewById(R.id.commandLine);
     private String getAdbLogCat() {
         try {
             StringBuilder logBuilder = new StringBuilder();
-            String[] homeCommand = {"pwd"};
-            String[] homeCommand2 = {"ls", "-al"};
-            String[] pwdCommand = {"pwd"};
-            String[] logcatCommand = {"logcat", "-d"};
-            Process process = Runtime.getRuntime().exec(commandLine.getText().toString());
+            Process process = Runtime.getRuntime().exec("logcat -d");
             BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String filename = String.valueOf(new Date().getTime());
             for (String log = br.readLine(); log != null; log = br.readLine()) {
                 logBuilder.append(log).append("\n\n");
             }
             br.close();
             return logBuilder.toString();
         } catch (IOException e) {
+            Log.e(this.getPackageName(), "Błąd odczytu logcat.", e);
             String err = "Cos jest nie tak" + e;
             System.err.println(err);
             return err;
