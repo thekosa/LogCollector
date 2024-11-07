@@ -2,6 +2,9 @@ package wat.inz.kolektorlogow;
 
 import android.util.Log;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import lombok.Data;
 
 public @Data class CollectorLog {
@@ -34,5 +37,21 @@ public @Data class CollectorLog {
         String[] tagMessage = parts[5].split("[:\\s]", 2);
         this.tag = tagMessage[0];
         this.message = tagMessage[1];
+    }
+
+    public List<String> getRow(){
+        List<String> row= new ArrayList<>();
+        row.add(date);
+        row.add(time);
+        row.add(pid);
+        row.add(tid);
+        row.add(priority);
+        row.add(tag);
+        row.add(message);
+        return row;
+    }
+
+    public boolean isEmpty(){
+        return date.isEmpty();
     }
 }

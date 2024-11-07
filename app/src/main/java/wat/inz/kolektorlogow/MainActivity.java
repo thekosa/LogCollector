@@ -10,6 +10,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ScrollView;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -23,8 +25,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import wat.inz.kolektorlogow.tableview.TableViewAdapter;
-import wat.inz.kolektorlogow.tableview.TableViewModel;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -32,10 +32,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private List<CollectorLog> logList;
     private TextView logListTextView;
     private ScrollView scrollViewLogs;
-    private TextView commandLine;
-    private TableView tableView;
-    private TableViewAdapter adapter;
-    private TableViewModel tableViewModel;
+    private TableLayout tableLayout;
 
 
     @SuppressLint("MissingInflatedId")
@@ -48,13 +45,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         logListTextView = findViewById(R.id.logList);
         refreshList.setOnClickListener(this);
         scrollViewLogs = findViewById(R.id.scrollViewList);
-        tableView = findViewById(R.id.tableView);
-
-        adapter = new TableViewAdapter();
-        tableViewModel = new TableViewModel();
-        tableView.setAdapter(adapter);
-
         logList = new ArrayList<>();
+        tableLayout = findViewById(R.id.tableLayout);
     }
 
     @Override
@@ -84,8 +76,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (v.getId() == R.id.refreshList) {
             refreshLogList();
             //Log.i("MainActivity.onClick", "stworzyłem liste logów!");
-            adapter.setAllItems(tableViewModel.getColumnHeaders(), null, tableViewModel.getCellData(logList));
+            for (CollectorLog log : logList) {
+                TableRow row = new TableRow(this);
+                List<String> rowData = log.getRow();
+                for (String rowElement : rowData) {
+                    row.addView(createNewTextView(rowElement));
+                }
+                tableLayout.addView(row);
+            }
         }
+    }
+
+    private TextView createNewTextView(String text) {
+        TextView cell = new TextView(this);
+        cell.setText(text);
+        cell.setPadding(8, 8, 8, 8);
+        return cell;
     }
 
     @SuppressLint("SetTextI18n")
@@ -109,6 +115,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             br.readLine();
             for (String logLine = br.readLine(); logLine != null; logLine = br.readLine()) {
                 // logBuilder.append(logLine).append("\n\n");
+                //todo ogarnąć żeby nie zapisywał pustych linii
                 logList.add(new CollectorLog(logLine));
             }
             br.close();
