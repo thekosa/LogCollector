@@ -7,4 +7,10 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="selected_background_color">@android:color/holo_green_dark</color>
+    <color name="shadow_background_color">#112812</color>
+    <color name="unselected_background_color">#00897B</color>
+    <color name="cell_background_color">#ffffff</color>
+    <color name="header_line_color">#0a0a0a</color>
+    <color name="table_view_default_text_color">#0a0a0a</color>
 </resources>

@@ -1,5 +1,7 @@
 package wat.inz.kolektorlogow;
 
+import static java.security.AccessController.getContext;
+
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.util.Log;
@@ -12,6 +14,8 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.evrencoskun.tableview.TableView;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -19,14 +23,20 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import wat.inz.kolektorlogow.tableview.TableViewAdapter;
+import wat.inz.kolektorlogow.tableview.TableViewModel;
+
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private Button refreshList;
-    private List<Log> logList = new ArrayList<>();
+    private List<CollectorLog> logList;
     private TextView logListTextView;
     private ScrollView scrollViewLogs;
     private TextView commandLine;
-    //private TableView tableView;
+    private TableView tableView;
+    private TableViewAdapter adapter;
+    private TableViewModel tableViewModel;
+
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -38,7 +48,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         logListTextView = findViewById(R.id.logList);
         refreshList.setOnClickListener(this);
         scrollViewLogs = findViewById(R.id.scrollViewList);
-      //  tableView = findViewById(R.id.tableView);
+        tableView = findViewById(R.id.tableView);
+
+        adapter = new TableViewAdapter();
+        tableViewModel = new TableViewModel();
+        tableView.setAdapter(adapter);
+
+        logList = new ArrayList<>();
     }
 
     @Override
@@ -67,6 +83,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         if (v.getId() == R.id.refreshList) {
             refreshLogList();
+            //Log.i("MainActivity.onClick", "stworzyłem liste logów!");
+            adapter.setAllItems(tableViewModel.getColumnHeaders(), null, tableViewModel.getCellData(logList));
         }
     }
 
@@ -87,8 +105,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Process process = Runtime.getRuntime().exec("logcat -d");
             BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String filename = String.valueOf(new Date().getTime());
-            for (String log = br.readLine(); log != null; log = br.readLine()) {
-                logBuilder.append(log).append("\n\n");
+            CollectorLog collectorLog;
+            br.readLine();
+            for (String logLine = br.readLine(); logLine != null; logLine = br.readLine()) {
+                // logBuilder.append(logLine).append("\n\n");
+                logList.add(new CollectorLog(logLine));
             }
             br.close();
             return logBuilder.toString();
