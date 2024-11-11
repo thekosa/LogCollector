@@ -52,6 +52,6 @@ public @Data class CollectorLog {
     }
 
     public boolean isEmpty(){
-        return date.isEmpty();
+        return date==null && time==null && pid==null && tid==null && priority==null && tag==null && message==null;
     }
 }
