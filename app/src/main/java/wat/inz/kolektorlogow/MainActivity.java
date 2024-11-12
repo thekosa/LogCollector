@@ -7,12 +7,19 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.Toast;
+import android.widget.EditText;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 
+
+import com.google.android.material.navigation.NavigationView;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -26,19 +33,31 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private TableLayout tableLayout;
     private String logcatCommand;
     private CollectorLogs collectorLogs;
+    private DrawerLayout drawerLayout;
+    private ImageButton filterButton;
+    private NavigationView navigationView;
 
+    private Button saveButton;
 
     @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.main_activity);
+
+
+        navigationView = findViewById(R.id.navigation_view);
+        saveButton = navigationView.findViewById(R.id.save_button);
+
+        drawerLayout = findViewById(R.id.drawer_layout);
+        filterButton = findViewById(R.id.filterButton);
+        refreshList = findViewById(R.id.refreshList);
+        tableLayout = findViewById(R.id.tableLayout);
 
         logcatCommand = "logcat -d";
         collectorLogs = new CollectorLogs();
-        refreshList = findViewById(R.id.refreshList);
-        refreshList.setOnClickListener(this);
-        tableLayout = findViewById(R.id.tableLayout);
+
+        saveButton.setOnClickListener(this);
     }
 
     @Override
@@ -75,6 +94,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
                 tableLayout.addView(row);
             }
+        }
+        if (v.getId() == filterButton.getId()) {
+            Toast.makeText(this, "Filter", Toast.LENGTH_SHORT).show();
+            drawerLayout.openDrawer(GravityCompat.END);
+        }
+        if (v.getId() == saveButton.getId()) {
+            Toast.makeText(this, "Save", Toast.LENGTH_SHORT).show();
+           drawerLayout.closeDrawer(navigationView);
         }
     }
 
