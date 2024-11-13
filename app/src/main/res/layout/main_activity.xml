@@ -62,7 +62,7 @@
                             android:layout_height="wrap_content"
                             android:padding="8dp"
                             android:text="Date"
-                            android:textStyle="bold" />
+                            android:textStyle="bold"  />
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -117,24 +117,6 @@
         android:layout_height="match_parent"
         android:layout_gravity="end">
         <!-- Drawer layout for settings -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:padding="16dp">
-
-            <!-- Settings inputs here -->
-            <EditText
-                android:id="@+id/command_input"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Command" />
-
-            <Button
-                android:id="@+id/save_button"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Save" />
-        </LinearLayout>
+        <include layout="@layout/drawer_view" />
     </com.google.android.material.navigation.NavigationView>
 </androidx.drawerlayout.widget.DrawerLayout>

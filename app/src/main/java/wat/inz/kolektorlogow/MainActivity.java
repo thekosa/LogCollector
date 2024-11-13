@@ -8,6 +8,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -36,8 +37,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private DrawerLayout drawerLayout;
     private ImageButton filterButton;
     private NavigationView navigationView;
-
     private Button saveButton;
+    private Spinner prioritySpinner;
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -48,6 +49,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         navigationView = findViewById(R.id.navigation_view);
         saveButton = navigationView.findViewById(R.id.save_button);
+        prioritySpinner = navigationView.findViewById(R.id.priority_spinner);
 
         drawerLayout = findViewById(R.id.drawer_layout);
         filterButton = findViewById(R.id.filterButton);
@@ -101,9 +103,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         if (v.getId() == saveButton.getId()) {
             Toast.makeText(this, "Save", Toast.LENGTH_SHORT).show();
-           drawerLayout.closeDrawer(navigationView);
+            //todo: funkcjonalność switcha adb, w postaci dopisania adb do polecenia
+            //todo: funkcjonalność tag + priority, w postaci dopisania tagu i priorytetu do polecenia razem z *"S, chyba że nie ma jednego z nich to dopisać grepa
+            //todo: funkcjonalność pid i tid, w postaci wyfiltrowania listy logów po tych danych
+            drawerLayout.closeDrawer(navigationView);
         }
     }
+    //todo: sortownie
 
     private TextView createNewCellTextView(String text) {
         TextView cell = new TextView(this);
@@ -116,10 +122,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         try {
             Process process = Runtime.getRuntime().exec(logcatCommand);
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            collectorLogs.destroyLogsList();
             collectorLogs.generateLogs(bufferedReader);
             bufferedReader.close();
         } catch (IOException e) {
             String err = "Błąd polecenia logcat. ";
+            Toast.makeText(this, err, Toast.LENGTH_SHORT).show();
             Log.e(this.getPackageName(), err, e);
             System.err.println(err + e);
         }

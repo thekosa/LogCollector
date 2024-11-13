@@ -31,7 +31,11 @@ public @Data class CollectorLogs {
         }
     }
 
-    public int size(){
+    public int size() {
         return logsList.size();
+    }
+
+    public void destroyLogsList() {
+        logsList.clear();
     }
 }
