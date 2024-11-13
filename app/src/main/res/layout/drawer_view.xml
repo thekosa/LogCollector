@@ -7,13 +7,6 @@
     android:padding="16dp">
     <!-- Settings inputs here -->
 
-    <Switch
-        android:id="@+id/adb_switch"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="ADB"
-        tools:ignore="UseSwitchCompatOrMaterialXml" />
-
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -62,6 +55,6 @@
         android:id="@+id/save_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Zapisz" />
+        android:text="Zastosuj" />
 
 </LinearLayout>
