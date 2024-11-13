@@ -4,6 +4,7 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import lombok.Data;
 
@@ -18,9 +19,6 @@ public @Data class CollectorLog {
 
     public CollectorLog(String logLine) {
         setLog(logLine);
-    }
-
-    public CollectorLog() {
     }
 
     public void setLog(String logLine) {
@@ -39,8 +37,8 @@ public @Data class CollectorLog {
         this.message = tagMessage[1];
     }
 
-    public List<String> getRow(){
-        List<String> row= new ArrayList<>();
+    public List<String> getRow() {
+        List<String> row = new ArrayList<>();
         row.add(date);
         row.add(time);
         row.add(pid);
@@ -51,7 +49,14 @@ public @Data class CollectorLog {
         return row;
     }
 
-    public boolean isEmpty(){
-        return date==null && time==null && pid==null && tid==null && priority==null && tag==null && message==null;
+    public boolean isEmpty() {
+        return date == null && time == null && pid == null && tid == null && priority == null && tag == null && message == null;
+    }
+
+    public boolean isCorrect(CollectorLogsFilter filter) {
+        return Objects.equals(filter.getTagFilter(), tag)
+                || Objects.equals(filter.getPriorityFilter(), priority)
+                || Objects.equals(filter.getPidFilter(), pid)
+                || Objects.equals(filter.getTidFilter(), tid);
     }
 }

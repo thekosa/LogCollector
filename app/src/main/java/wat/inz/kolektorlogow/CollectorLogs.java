@@ -16,11 +16,11 @@ public @Data class CollectorLogs {
         logsList = new ArrayList<>();
     }
 
-    public void generateLogs(BufferedReader stream) {
+    public void generateLogs(BufferedReader stream, CollectorLogsFilter filter) {
         try {
             for (String logLine = stream.readLine(); logLine != null; logLine = stream.readLine()) {
                 CollectorLog log = new CollectorLog(logLine);
-                if (!log.isEmpty()) {
+                if (!log.isEmpty() && (filter.isNull() || log.isCorrect(filter))) {
                     logsList.add(log);
                 }
             }
@@ -29,6 +29,16 @@ public @Data class CollectorLogs {
             Log.e("CollectorLogs.generateLogs", err, e);
             System.err.println(err + e);
         }
+    }
+
+    public void filterOutLogs(CollectorLogsFilter filter) {
+        List<CollectorLog> logsListCopy = new ArrayList<>();
+        for (CollectorLog log : logsList) {
+            if (log.isCorrect(filter)) {
+                logsListCopy.add(log);
+            }
+        }
+        logsList = logsListCopy;
     }
 
     public int size() {
