@@ -38,9 +38,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private TableLayout tableLayout;
     private String logcatCommand;
     private CollectorLogs collectorLogs;
+    private CollectorLogs collectorLogsFiltered;
     private DrawerLayout drawerLayout;
-    private ImageButton filtersLayoutButton;
-    private NavigationView navigationView;
+    private ImageButton settingsButton;
+    private NavigationView settingsBar;
     private Button saveFiltersButton;
     private Spinner prioritySpinner;
     private EditText tagInput;
@@ -57,22 +58,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
 
-        navigationView = findViewById(R.id.navigation_view);
-        saveFiltersButton = navigationView.findViewById(R.id.save_button);
-        prioritySpinner = navigationView.findViewById(R.id.priority_spinner);
-        tagInput = navigationView.findViewById(R.id.tag_input);
-        pidInput = navigationView.findViewById(R.id.pid_input);
-        tidInput = navigationView.findViewById(R.id.tid_input);
+        settingsBar = findViewById(R.id.navigation_view);
+        saveFiltersButton = settingsBar.findViewById(R.id.save_button);
+        prioritySpinner = settingsBar.findViewById(R.id.priority_spinner);
+        tagInput = settingsBar.findViewById(R.id.tag_input);
+        pidInput = settingsBar.findViewById(R.id.pid_input);
+        tidInput = settingsBar.findViewById(R.id.tid_input);
 
         drawerLayout = findViewById(R.id.drawer_layout);
-        filtersLayoutButton = findViewById(R.id.filterButton);
-        filtersLayoutButton.setEnabled(false);
+        settingsButton = findViewById(R.id.settings_button);
+        settingsButton.setEnabled(false);
         refreshList = findViewById(R.id.refreshList);
         tableLayout = findViewById(R.id.tableLayout);
         adbSwitch = findViewById(R.id.adb_switch);
 
         logcatCommand = "logcat -d";
         collectorLogs = new CollectorLogs();
+        collectorLogsFiltered = new CollectorLogs();
         logsListFilter = new CollectorLogsFilter(null, null, null, null);
 
         saveFiltersButton.setOnClickListener(this);
@@ -111,42 +113,46 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
+        //Przycisk Odświeżania listy logów
         if (v.getId() == refreshList.getId()) {
             refreshLogList();
+            collectorLogsFiltered.setLogsList(collectorLogs.filterOutLogs(logsListFilter));
             buildLogsListTableLayout();
-            if (!filtersLayoutButton.isEnabled()) {
-                filtersLayoutButton.setEnabled(true);
-                filtersLayoutButton.setAlpha(1.0f);
-                filtersLayoutButton.setBackgroundColor(ContextCompat.getColor(this, R.color.purple_500));
+            if (!settingsButton.isEnabled()) {
+                settingsButton.setEnabled(true);
+                settingsButton.setAlpha(1.0f);
+                settingsButton.setBackgroundColor(ContextCompat.getColor(this, R.color.purple_500));
             }
         }
-        if (v.getId() == filtersLayoutButton.getId()) {
+        //Przycisk Wyświetlania belki filtrów
+        if (v.getId() == settingsButton.getId()) {
             Toast.makeText(this, "Filter", Toast.LENGTH_SHORT).show();
             drawerLayout.openDrawer(GravityCompat.END);
         }
+        //Przycisk Zapisywania filtrów
         if (v.getId() == saveFiltersButton.getId()) {
             logsListFilter.setFilter(tagInput.getText().toString(),
                     priorityMap.get(prioritySpinner.getSelectedItem().toString()),
                     pidInput.getText().toString(),
                     tidInput.getText().toString());
-            collectorLogs.filterOutLogs(logsListFilter);
+            collectorLogsFiltered.setLogsList(collectorLogs.filterOutLogs(logsListFilter));
             buildLogsListTableLayout();
             Toast.makeText(this, "Saved", Toast.LENGTH_SHORT).show();
-            drawerLayout.closeDrawer(navigationView);
+            drawerLayout.closeDrawer(settingsBar);
         }
+        //Switch komendy adb
         if (v.getId() == adbSwitch.getId()) {
             logcatCommand = adbSwitch.isChecked() ? "adb logcat -d" : "logcat -d";
         }
     }
-    //todo: sortownie w zakładce z filtrami w postaci spinnera z nazwami kolumn i spinnera rosnąco/malejąco
-    //todo: pozmieniać nazwy tej belki jako opcje wyświetlania, a nie filtrów
-    //todo: opcja wyświetlania bez jakichś kolumn w belce filtrów, jako grupa checkboxów
+    //todo: sortownie w silniku
+    //todo: opcja wyświetlania kolumn w silniku
     //todo: zrobić dwie listy logów, jedna pierwotna zmieniana tylko w momencie odświeżenia listy, druga filtrowana, zmieniana podłóg potrzeb
     //todo: naprawić filtrowanie po wszystkich priorytetach
 
     private void buildLogsListTableLayout() {
         resetTableLayout();
-        for (CollectorLog log : collectorLogs.getLogsList()) {
+        for (CollectorLog log : collectorLogsFiltered.getLogsList()) {
             TableRow row = new TableRow(this);
             List<String> rowData = log.getRow();
             for (String rowElement : rowData) {

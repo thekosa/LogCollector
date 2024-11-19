@@ -32,20 +32,20 @@
                 android:layout_height="match_parent"
                 android:layout_alignParentStart="true"
                 android:layout_marginEnd="5dp"
-                android:layout_toStartOf="@id/filterButton"
+                android:layout_toStartOf="@id/settings_button"
                 android:onClick="onClick"
                 android:text="odśwież"
                 tools:ignore="HardcodedText" />
 
             <ImageButton
-                android:id="@+id/filterButton"
+                android:id="@+id/settings_button"
                 android:layout_width="50dp"
                 android:layout_height="match_parent"
                 android:layout_alignParentEnd="true"
                 android:layout_marginStart="5dp"
                 android:alpha="0.5"
                 android:background="#787878"
-                android:contentDescription="Opcje filtrowania i sortowania"
+                android:contentDescription="Opcje wyświetlania"
                 android:onClick="onClick"
                 android:scaleType="centerInside"
                 android:src="@drawable/ic_menu" />

@@ -18,4 +18,16 @@
         <item>Error</item>
         <item>Fatal</item>
     </string-array>
+    <string-array name="columns">
+        <item>Date</item>
+        <item>Time</item>
+        <item>PID</item>
+        <item>TID</item>
+        <item>Priority</item>
+        <item>Tag</item>
+    </string-array>
+    <string-array name="direction_sort">
+        <item>Ascendingly</item>
+        <item>Descendingly</item>
+    </string-array>
 </resources>

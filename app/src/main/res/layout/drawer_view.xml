@@ -6,55 +6,140 @@
     android:orientation="vertical"
     android:padding="16dp">
     <!-- Settings inputs here -->
-
-    <TextView
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Tag:" />
+        android:layout_height="match_parent">
 
-    <EditText
-        android:id="@+id/tag_input"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="text" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Priority:" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Filtry:"
+                android:textSize="20dp"
+                android:textStyle="bold" />
 
-    <Spinner
-        android:id="@+id/priority_spinner"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:entries="@array/priority_array" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Tag:" />
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="PID:" />
+            <EditText
+                android:id="@+id/tag_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text" />
 
-    <EditText
-        android:id="@+id/pid_input"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="text" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Priority:" />
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="TID:" />
+            <Spinner
+                android:id="@+id/priority_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:entries="@array/priority_array" />
 
-    <EditText
-        android:id="@+id/tid_input"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="text" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="PID:" />
 
-    <Button
-        android:id="@+id/save_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Zastosuj" />
+            <EditText
+                android:id="@+id/pid_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="TID:" />
+
+            <EditText
+                android:id="@+id/tid_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Wybór kolumn:"
+                android:textSize="20dp"
+                android:textStyle="bold" />
+
+            <CheckBox
+                android:id="@+id/date_column_visible"
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                android:text="Date" />
+
+            <CheckBox
+                android:id="@+id/time_column_visible"
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                android:text="Time" />
+
+            <CheckBox
+                android:id="@+id/pid_column_visible"
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                android:text="PID" />
+
+            <CheckBox
+                android:id="@+id/tid_column_visible"
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                android:text="TID" />
+
+            <CheckBox
+                android:id="@+id/priority_column_visible"
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                android:text="Priority" />
+
+            <CheckBox
+                android:id="@+id/tag_column_visible"
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                android:text="Tag" />
+
+            <CheckBox
+                android:id="@+id/massage_column_visible"
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                android:text="Message" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                android:text="Sortowanie:"
+                android:textSize="20dp"
+                android:textStyle="bold" />
+
+            <Spinner
+                android:id="@+id/column_sort"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:entries="@array/columns" />
+
+            <Spinner
+                android:id="@+id/direction_sort"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:entries="@array/direction_sort" />
+
+            <Button
+                android:id="@+id/save_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Zastosuj" />
+        </LinearLayout>
+    </ScrollView>
 
 </LinearLayout>

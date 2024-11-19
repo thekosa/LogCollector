@@ -46,14 +46,14 @@ public @Data class CollectorLogs {
         }
     }
 
-    public void filterOutLogs(CollectorLogsFilter filter) {
+    public List<CollectorLog> filterOutLogs(CollectorLogsFilter filter) {
         List<CollectorLog> logsListCopy = new ArrayList<>();
         for (CollectorLog log : logsList) {
             if (log.isCorrect(filter)) {
                 logsListCopy.add(log);
             }
         }
-        logsList = logsListCopy;
+        return logsListCopy;
     }
 
     public int size() {

@@ -54,9 +54,9 @@ public @Data class CollectorLog {
     }
 
     public boolean isCorrect(CollectorLogsFilter filter) {
-        return Objects.equals(filter.getTagFilter(), tag)
-                || Objects.equals(filter.getPriorityFilter(), priority)
-                || Objects.equals(filter.getPidFilter(), pid)
-                || Objects.equals(filter.getTidFilter(), tid);
+        return (filter.getTagFilter() == null || Objects.equals(filter.getTagFilter(), tag))
+                && (filter.getPriorityFilter() == null || Objects.equals(filter.getPriorityFilter(), priority))
+                && (filter.getPidFilter() == null || Objects.equals(filter.getPidFilter(), pid))
+                && (filter.getTidFilter() == null || Objects.equals(filter.getTidFilter(), tid));
     }
 }
