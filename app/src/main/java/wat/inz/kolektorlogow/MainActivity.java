@@ -18,6 +18,7 @@ import android.widget.Toast;
 import android.widget.EditText;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
@@ -65,6 +66,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         drawerLayout = findViewById(R.id.drawer_layout);
         filtersLayoutButton = findViewById(R.id.filterButton);
+        filtersLayoutButton.setEnabled(false);
         refreshList = findViewById(R.id.refreshList);
         tableLayout = findViewById(R.id.tableLayout);
         adbSwitch = findViewById(R.id.adb_switch);
@@ -110,9 +112,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View v) {
         if (v.getId() == refreshList.getId()) {
-            logcatCommand = adbSwitch.isChecked() ? "adb logcat -d" : "logcat -d";
             refreshLogList();
             buildLogsListTableLayout();
+            if (!filtersLayoutButton.isEnabled()) {
+                filtersLayoutButton.setEnabled(true);
+                filtersLayoutButton.setAlpha(1.0f);
+                filtersLayoutButton.setBackgroundColor(ContextCompat.getColor(this, R.color.purple_500));
+            }
         }
         if (v.getId() == filtersLayoutButton.getId()) {
             Toast.makeText(this, "Filter", Toast.LENGTH_SHORT).show();
@@ -128,9 +134,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Toast.makeText(this, "Saved", Toast.LENGTH_SHORT).show();
             drawerLayout.closeDrawer(navigationView);
         }
+        if (v.getId() == adbSwitch.getId()) {
+            logcatCommand = adbSwitch.isChecked() ? "adb logcat -d" : "logcat -d";
+        }
     }
     //todo: sortownie w zakładce z filtrami w postaci spinnera z nazwami kolumn i spinnera rosnąco/malejąco
-    //todo: przycisk filtrów wyszarzony/nieklikalny w momencie startu aplikacji, aż do momentu powstania listy logów
     //todo: pozmieniać nazwy tej belki jako opcje wyświetlania, a nie filtrów
     //todo: opcja wyświetlania bez jakichś kolumn w belce filtrów, jako grupa checkboxów
     //todo: zrobić dwie listy logów, jedna pierwotna zmieniana tylko w momencie odświeżenia listy, druga filtrowana, zmieniana podłóg potrzeb
@@ -194,7 +202,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Process process = Runtime.getRuntime().exec(logcatCommand);
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             collectorLogs.destroyLogsList();
-            collectorLogs.generateLogs(bufferedReader, logsListFilter);
+            collectorLogs.generateLogs(bufferedReader);
             bufferedReader.close();
         } catch (IOException e) {
             String err = "Błąd polecenia logcat. ";

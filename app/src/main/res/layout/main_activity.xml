@@ -15,9 +15,10 @@
             android:id="@+id/adb_switch"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="ADB"
             android:layout_margin="10dp"
-            tools:ignore="UseSwitchCompatOrMaterialXml" />
+            android:text="ADB"
+            tools:ignore="UseSwitchCompatOrMaterialXml"
+            android:onClick="onClick" />
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -33,7 +34,8 @@
                 android:layout_marginEnd="5dp"
                 android:layout_toStartOf="@id/filterButton"
                 android:onClick="onClick"
-                android:text="odśwież" />
+                android:text="odśwież"
+                tools:ignore="HardcodedText" />
 
             <ImageButton
                 android:id="@+id/filterButton"
@@ -41,10 +43,13 @@
                 android:layout_height="match_parent"
                 android:layout_alignParentEnd="true"
                 android:layout_marginStart="5dp"
-                android:background="@color/purple_500"
+                android:alpha="0.5"
+                android:background="#787878"
+                android:contentDescription="Opcje filtrowania i sortowania"
                 android:onClick="onClick"
                 android:scaleType="centerInside"
                 android:src="@drawable/ic_menu" />
+
         </RelativeLayout>
 
         <ScrollView

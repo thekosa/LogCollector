@@ -16,6 +16,21 @@ public @Data class CollectorLogs {
         logsList = new ArrayList<>();
     }
 
+    public void generateLogs(BufferedReader stream) {
+        try {
+            for (String logLine = stream.readLine(); logLine != null; logLine = stream.readLine()) {
+                CollectorLog log = new CollectorLog(logLine);
+                if (!log.isEmpty()) {
+                    logsList.add(log);
+                }
+            }
+        } catch (IOException e) {
+            String err = "Błąd odczytu logów z konsoli. ";
+            Log.e("CollectorLogs.generateLogs", err, e);
+            System.err.println(err + e);
+        }
+    }
+
     public void generateLogs(BufferedReader stream, CollectorLogsFilter filter) {
         try {
             for (String logLine = stream.readLine(); logLine != null; logLine = stream.readLine()) {
