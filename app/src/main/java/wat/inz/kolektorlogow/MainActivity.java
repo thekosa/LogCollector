@@ -1,6 +1,7 @@
 package wat.inz.kolektorlogow;
 
 import android.annotation.SuppressLint;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.util.Log;
@@ -143,6 +144,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //Switch komendy adb
         if (v.getId() == adbSwitch.getId()) {
             logcatCommand = adbSwitch.isChecked() ? "adb logcat -d" : "logcat -d";
+            Toast.makeText(this, logcatCommand, Toast.LENGTH_SHORT).show();
         }
     }
     //todo: sortownie w silniku
@@ -154,9 +156,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         resetTableLayout();
         for (CollectorLog log : collectorLogsFiltered.getLogsList()) {
             TableRow row = new TableRow(this);
-            List<String> rowData = log.getRow();
-            for (String rowElement : rowData) {
-                row.addView(createNewCellTextView(rowElement, false));
+            for (String rowElement : log.getRow()) {
+                row.addView(createNewCellTextView(rowElement, false, log.getColor()));
             }
             tableLayout.addView(row);
         }
@@ -193,6 +194,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             command.append("|grep ").append(priority);
         }
         logcatCommand = command.toString();
+    }
+
+    private TextView createNewCellTextView(String text, boolean bold, int color) {
+        TextView cell = createNewCellTextView(text, bold);
+        cell.setTextColor(color);
+        return cell;
     }
 
     private TextView createNewCellTextView(String text, boolean bold) {

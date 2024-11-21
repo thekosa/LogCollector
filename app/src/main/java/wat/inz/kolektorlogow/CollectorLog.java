@@ -1,5 +1,6 @@
 package wat.inz.kolektorlogow;
 
+import android.graphics.Color;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ public @Data class CollectorLog {
     private String priority;
     private String tag;
     private String message;
+    private int color;
 
     public CollectorLog(String logLine) {
         setLog(logLine);
@@ -35,6 +37,29 @@ public @Data class CollectorLog {
         String[] tagMessage = parts[5].split("[:\\s]", 2);
         this.tag = tagMessage[0];
         this.message = tagMessage[1];
+        switch (Objects.requireNonNull(priority)) {
+            case "V":
+                color = Color.DKGRAY;
+                break;
+            case "D":
+                color = Color.BLUE;
+                break;
+            case "I":
+                color = Color.GREEN;
+                break;
+            case "W":
+                color = Color.YELLOW;
+                break;
+            case "E":
+                color = Color.RED;
+                break;
+            case "F":
+                color = Color.MAGENTA;
+                break;
+            default:
+                color = Color.BLACK;
+                break;
+        }
     }
 
     public List<String> getRow() {
