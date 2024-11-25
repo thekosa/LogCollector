@@ -1,16 +1,12 @@
 package wat.inz.kolektorlogow;
 
-import android.annotation.SuppressLint;
 import android.graphics.Color;
 import android.util.Log;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 import lombok.Data;

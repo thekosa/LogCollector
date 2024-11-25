@@ -8,6 +8,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.Switch;
@@ -15,13 +16,11 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.EditText;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
-
 
 import com.google.android.material.navigation.NavigationView;
 
@@ -156,17 +155,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Toast.makeText(this, logcatCommand, Toast.LENGTH_SHORT).show();
         }
     }
-    //todo: sortownie w silniku
     //todo: opcja wyświetlania kolumn w silniku
-    //todo: zrobić dwie listy logów, jedna pierwotna zmieniana tylko w momencie odświeżenia listy, druga filtrowana, zmieniana podłóg potrzeb
-    //todo: naprawić filtrowanie po wszystkich priorytetach
+    //todo: shizuku
 
     private void buildLogsListTableLayout() {
         resetTableLayout();
         for (CollectorLog log : collectorLogsFiltered.getLogsList()) {
             TableRow row = new TableRow(this);
             for (String rowElement : log.getRow()) {
-                row.addView(createNewCellTextView(rowElement, false, log.getColor()));
+                row.addView(createNewCellTextViewBody(rowElement, log.getColor()));
             }
             tableLayout.addView(row);
         }
@@ -185,27 +182,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-    private void generateCommand(boolean adbSwitch, String tag, String priority) {
-        StringBuilder command = new StringBuilder();
-        if (adbSwitch) {
-            command.append("adb ");
-        }
-        command.append(logcatCommand);
-        boolean priorityIsNotUndefined = priority.compareTo("null") != 0 && priority.compareTo("*") != 0;
-        if (tag != null && priorityIsNotUndefined) {
-            command.append(tag).append(":").append(priority).append(" *:S");
-        } else if (tag != null && priority.compareTo("*") == 0) {
-            command.append(tag).append(":").append("V");
-        } else if (tag != null && priority.compareTo("null") == 0) {
-            command.append("|grep ").append(tag);
-        } else if (tag == null && priorityIsNotUndefined) {
-            command.append("|grep ").append(priority);
-        }
-        logcatCommand = command.toString();
-    }
-
-    private TextView createNewCellTextView(String text, boolean bold, int color) {
-        TextView cell = createNewCellTextView(text, bold);
+    private TextView createNewCellTextViewBody(String text, int color) {
+        TextView cell = createNewCellTextView(text, false);
         cell.setTextColor(color);
         return cell;
     }

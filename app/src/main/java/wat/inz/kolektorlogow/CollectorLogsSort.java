@@ -34,7 +34,7 @@ public @Data class CollectorLogsSort {
         return direction ? "Ascendingly" : "Descendingly";
     }
 
-    public List<CollectorLog> sort(List<CollectorLog> logsList){
+    public List<CollectorLog> sort(List<CollectorLog> logsList) {
         return sort(columnName, direction, logsList);
     }
 
