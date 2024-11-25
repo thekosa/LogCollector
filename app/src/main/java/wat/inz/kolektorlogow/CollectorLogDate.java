@@ -10,11 +10,11 @@ import java.util.Date;
 
 public class CollectorLogDate extends Date {
     private final Date date;
-    private final SimpleDateFormat formatter;
-
     @SuppressLint("SimpleDateFormat")
+    private static final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+
+
     public CollectorLogDate(String dateTimeString) throws ParseException {
-        this.formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
         this.date = formatter.parse(dateTimeString);
     }
 
