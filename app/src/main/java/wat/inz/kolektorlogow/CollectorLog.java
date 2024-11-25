@@ -1,17 +1,20 @@
 package wat.inz.kolektorlogow;
 
+import android.annotation.SuppressLint;
 import android.graphics.Color;
 import android.util.Log;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
 import lombok.Data;
 
 public @Data class CollectorLog {
-    private String date;
-    private String time;
+    private CollectorLogDate dateTime;
     private String pid;
     private String tid;
     private String priority;
@@ -29,8 +32,7 @@ public @Data class CollectorLog {
         }
         Log.i("CollectorLog.setLog", "Zabieram się za pracę nad logiem: " + logLine);
         String[] parts = logLine.split("\\s+|(?<=:)\\s", 6);
-        this.date = parts[0];
-        this.time = parts[1];
+        setDateTime(parts[0], parts[1]);
         this.pid = parts[2];
         this.tid = parts[3];
         this.priority = parts[4];
@@ -64,18 +66,18 @@ public @Data class CollectorLog {
 
     public List<String> getRow() {
         List<String> row = new ArrayList<>();
-        row.add(date);
-        row.add(time);
+        row.add(dateTime.toString());
         row.add(pid);
         row.add(tid);
         row.add(priority);
         row.add(tag);
         row.add(message);
+        Log.i("CollectorLog.setLog", "Zapisałem log: " + row);
         return row;
     }
 
     public boolean isEmpty() {
-        return date == null && time == null && pid == null && tid == null && priority == null && tag == null && message == null;
+        return dateTime == null && pid == null && tid == null && priority == null && tag == null && message == null;
     }
 
     public boolean isCorrect(CollectorLogsFilter filter) {
@@ -83,5 +85,14 @@ public @Data class CollectorLog {
                 && (filter.getPriorityFilter() == null || Objects.equals(filter.getPriorityFilter(), priority))
                 && (filter.getPidFilter() == null || Objects.equals(filter.getPidFilter(), pid))
                 && (filter.getTidFilter() == null || Objects.equals(filter.getTidFilter(), tid));
+    }
+
+    private void setDateTime(String date, String time) {
+        try {
+            this.dateTime = new CollectorLogDate(date + " " + time);
+        } catch (ParseException e) {
+            System.err.println("Błąd parsowania daty: " + e.getMessage());
+            this.dateTime.setTime(0);
+        }
     }
 }

@@ -1,7 +1,6 @@
 package wat.inz.kolektorlogow;
 
 import android.annotation.SuppressLint;
-import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.util.Log;
@@ -30,7 +29,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 
@@ -73,7 +71,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         tableLayout = findViewById(R.id.tableLayout);
         adbSwitch = findViewById(R.id.adb_switch);
 
-        logcatCommand = "logcat -d";
+        logcatCommand = "logcat -d -v year";
         collectorLogs = new CollectorLogs();
         collectorLogsFiltered = new CollectorLogs();
         logsListFilter = new CollectorLogsFilter(null, null, null, null);
@@ -143,7 +141,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         //Switch komendy adb
         if (v.getId() == adbSwitch.getId()) {
-            logcatCommand = adbSwitch.isChecked() ? "adb logcat -d" : "logcat -d";
+            logcatCommand = adbSwitch.isChecked() ? "adb logcat -d -v year" : "logcat -d -v year";
             Toast.makeText(this, logcatCommand, Toast.LENGTH_SHORT).show();
         }
     }
@@ -166,8 +164,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void resetTableLayout() {
         tableLayout.removeAllViews();
         TableRow row = new TableRow(this);
-        row.addView(createNewCellTextView("Date", true));
-        row.addView(createNewCellTextView("Time", true));
+        row.addView(createNewCellTextView("Date & Time", true));
         row.addView(createNewCellTextView("PID", true));
         row.addView(createNewCellTextView("TID", true));
         row.addView(createNewCellTextView("Priority", true));

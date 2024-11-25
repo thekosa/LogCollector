@@ -1,7 +1,5 @@
 package wat.inz.kolektorlogow;
 
-import java.util.Objects;
-
 import lombok.Data;
 
 public @Data class CollectorLogsFilter {

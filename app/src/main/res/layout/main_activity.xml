@@ -16,9 +16,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
+            android:onClick="onClick"
             android:text="ADB"
-            tools:ignore="UseSwitchCompatOrMaterialXml"
-            android:onClick="onClick" />
+            tools:ignore="UseSwitchCompatOrMaterialXml" />
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -70,19 +70,11 @@
                     <!-- Wiersz nagłówków -->
                     <TableRow>
 
-
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:padding="8dp"
-                            android:text="Date"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:padding="8dp"
-                            android:text="Time"
+                            android:text="Date &amp; Time"
                             android:textStyle="bold" />
 
                         <TextView
