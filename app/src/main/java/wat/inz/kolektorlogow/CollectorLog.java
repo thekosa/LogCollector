@@ -39,13 +39,13 @@ public @Data class CollectorLog {
         this.message = tagMessage[1];
         switch (Objects.requireNonNull(priority)) {
             case "V":
-                color = Color.DKGRAY;
+                color = Color.GRAY;
                 break;
             case "D":
-                color = Color.BLUE;
+                color = Color.GREEN;
                 break;
             case "I":
-                color = Color.GREEN;
+                color = Color.BLUE;
                 break;
             case "W":
                 color = Color.YELLOW;
