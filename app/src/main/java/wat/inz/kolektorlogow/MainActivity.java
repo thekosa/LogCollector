@@ -48,8 +48,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private EditText tidInput;
     @SuppressLint("UseSwitchCompatOrMaterialCode")
     private Switch adbSwitch;
-    private CollectorLogsFilter logsListFilter;
+    private CollectorLogsFilter collectorLogsFilter;
+    private CollectorLogsSort collectorLogsSort;
     private Map<String, String> priorityMap;
+    private Spinner spinnerSortColumnName;
+    private Spinner spinnerSortDirection;
+
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -63,6 +67,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         tagInput = settingsBar.findViewById(R.id.tag_input);
         pidInput = settingsBar.findViewById(R.id.pid_input);
         tidInput = settingsBar.findViewById(R.id.tid_input);
+        spinnerSortColumnName = findViewById(R.id.column_sort);
+        spinnerSortDirection = findViewById(R.id.direction_sort);
 
         drawerLayout = findViewById(R.id.drawer_layout);
         settingsButton = findViewById(R.id.settings_button);
@@ -74,7 +80,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         logcatCommand = "logcat -d -v year";
         collectorLogs = new CollectorLogs();
         collectorLogsFiltered = new CollectorLogs();
-        logsListFilter = new CollectorLogsFilter(null, null, null, null);
+        collectorLogsFilter = new CollectorLogsFilter(null, null, null, null);
+        collectorLogsSort = new CollectorLogsSort("Date & Time", true);
 
         saveFiltersButton.setOnClickListener(this);
 
@@ -115,7 +122,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //Przycisk Odświeżania listy logów
         if (v.getId() == refreshList.getId()) {
             refreshLogList();
-            collectorLogsFiltered.setLogsList(collectorLogs.filterOutLogs(logsListFilter));
+            collectorLogs.sortOutLogs(collectorLogsSort);
+            collectorLogsFiltered.setLogsList(collectorLogs.filterOutLogs(collectorLogsFilter));
             buildLogsListTableLayout();
             if (!settingsButton.isEnabled()) {
                 settingsButton.setEnabled(true);
@@ -130,11 +138,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         //Przycisk Zapisywania filtrów
         if (v.getId() == saveFiltersButton.getId()) {
-            logsListFilter.setFilter(tagInput.getText().toString(),
+            collectorLogsSort.setColumnName(spinnerSortColumnName.getSelectedItem().toString());
+            collectorLogsSort.setDirection(spinnerSortDirection.getSelectedItem().toString().equals("Ascendingly"));
+            collectorLogs.sortOutLogs(collectorLogsSort);
+            collectorLogsFilter.setFilter(tagInput.getText().toString(),
                     priorityMap.get(prioritySpinner.getSelectedItem().toString()),
                     pidInput.getText().toString(),
                     tidInput.getText().toString());
-            collectorLogsFiltered.setLogsList(collectorLogs.filterOutLogs(logsListFilter));
+            collectorLogsFiltered.setLogsList(collectorLogs.filterOutLogs(collectorLogsFilter));
             buildLogsListTableLayout();
             Toast.makeText(this, "Saved", Toast.LENGTH_SHORT).show();
             drawerLayout.closeDrawer(settingsBar);

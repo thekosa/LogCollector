@@ -8,7 +8,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import lombok.Data;
@@ -22,8 +24,16 @@ public @Data class CollectorLog {
     private String message;
     private int color;
 
+    private static final HashMap<String, Integer> priorityMap = new HashMap<>();
+
     public CollectorLog(String logLine) {
         setLog(logLine);
+        priorityMap.put("Verbose", Color.GRAY);
+
+        priorityMap.put("Debug", Color.GREEN);
+        priorityMap.put("Info", Color.BLUE);
+        priorityMap.put("Warning", Color.YELLOW);
+        priorityMap.put("Error", Color.RED);
     }
 
     public void setLog(String logLine) {
