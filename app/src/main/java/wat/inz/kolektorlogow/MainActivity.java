@@ -1,7 +1,7 @@
 package wat.inz.kolektorlogow;
 
 import android.annotation.SuppressLint;
-import android.graphics.Color;
+import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.util.Log;
@@ -23,15 +23,16 @@ import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
-
 import com.google.android.material.navigation.NavigationView;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+
+import rikka.shizuku.Shizuku;
+import rikka.sui.Sui;
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -116,6 +117,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         //Przycisk Odświeżania listy logów
         if (v.getId() == refreshList.getId()) {
+            Sui.init(this.getPackageName());
             refreshLogList();
             collectorLogsFiltered.setLogsList(collectorLogs.filterOutLogs(logsListFilter));
             buildLogsListTableLayout();
