@@ -72,7 +72,6 @@ public @Data class CollectorLog {
         row.add(priority);
         row.add(tag);
         row.add(message);
-        Log.i("CollectorLog.setLog", "Zapisałem log: " + row);
         return row;
     }
 
