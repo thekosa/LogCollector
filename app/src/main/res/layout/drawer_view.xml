@@ -77,13 +77,7 @@
                 android:id="@+id/date_column_visible"
                 android:layout_width="match_parent"
                 android:layout_height="30dp"
-                android:text="Date" />
-
-            <CheckBox
-                android:id="@+id/time_column_visible"
-                android:layout_width="match_parent"
-                android:layout_height="30dp"
-                android:text="Time" />
+                android:text="Date &amp; Time" />
 
             <CheckBox
                 android:id="@+id/pid_column_visible"
