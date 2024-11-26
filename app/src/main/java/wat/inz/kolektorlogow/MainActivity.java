@@ -8,6 +8,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Spinner;
@@ -52,6 +53,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Map<String, String> priorityMap;
     private Spinner spinnerSortColumnName;
     private Spinner spinnerSortDirection;
+    private Button buttonSelectAllVisibility;
+    private CheckBox checkBoxDateTimeVisibility;
+    private CheckBox checkBoxPidVisibility;
+    private CheckBox checkBoxTidVisibility;
+    private CheckBox checkBoxPriorityVisibility;
+    private CheckBox checkBoxTagVisibility;
+    private CheckBox checkBoxMassageVisibility;
 
 
     @SuppressLint("MissingInflatedId")
@@ -75,6 +83,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         refreshList = findViewById(R.id.refreshList);
         tableLayout = findViewById(R.id.tableLayout);
         adbSwitch = findViewById(R.id.adb_switch);
+        buttonSelectAllVisibility = findViewById(R.id.button_select_all_visibility);
+        checkBoxDateTimeVisibility = findViewById(R.id.checkbox_datetime_visibility);
+        checkBoxPidVisibility = findViewById(R.id.checkbox_pid_visibility);
+        checkBoxTidVisibility = findViewById(R.id.checkbox_tid_visibility);
+        checkBoxPriorityVisibility = findViewById(R.id.checkbox_priority_visibility);
+        checkBoxTagVisibility = findViewById(R.id.checkbox_tag_visibility);
+        checkBoxMassageVisibility = findViewById(R.id.checkbox_massage_visibility);
+        checkBoxDateTimeVisibility.setChecked(true);
+        checkBoxPidVisibility.setChecked(true);
+        checkBoxTidVisibility.setChecked(true);
+        checkBoxPriorityVisibility.setChecked(true);
+        checkBoxTagVisibility.setChecked(true);
+        checkBoxMassageVisibility.setChecked(true);
 
         logcatCommand = "logcat -d -v year";
         collectorLogs = new CollectorLogs();
@@ -154,6 +175,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             logcatCommand = adbSwitch.isChecked() ? "adb logcat -d -v year" : "logcat -d -v year";
             Toast.makeText(this, logcatCommand, Toast.LENGTH_SHORT).show();
         }
+        //Przycisk zaznaczenia wszystkich kolumn
+        if (v.getId() == buttonSelectAllVisibility.getId()) {
+            checkBoxDateTimeVisibility.setChecked(true);
+            checkBoxPidVisibility.setChecked(true);
+            checkBoxTidVisibility.setChecked(true);
+            checkBoxPriorityVisibility.setChecked(true);
+            checkBoxTagVisibility.setChecked(true);
+            checkBoxMassageVisibility.setChecked(true);
+        }
     }
     //todo: opcja wyświetlania kolumn w silniku
     //todo: shizuku
@@ -162,7 +192,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         resetTableLayout();
         for (CollectorLog log : collectorLogsFiltered.getLogsList()) {
             TableRow row = new TableRow(this);
-            for (String rowElement : log.getRow()) {
+            for (String rowElement : log.getRowSelectively(
+                    checkBoxDateTimeVisibility.isChecked(),
+                    checkBoxPidVisibility.isChecked(),
+                    checkBoxTidVisibility.isChecked(),
+                    checkBoxPriorityVisibility.isChecked(),
+                    checkBoxTagVisibility.isChecked(),
+                    checkBoxMassageVisibility.isChecked())) {
                 row.addView(createNewCellTextViewBody(rowElement, log.getColor()));
             }
             tableLayout.addView(row);
@@ -172,14 +208,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void resetTableLayout() {
         tableLayout.removeAllViews();
         TableRow row = new TableRow(this);
-        row.addView(createNewCellTextView("Date & Time", true));
-        row.addView(createNewCellTextView("PID", true));
-        row.addView(createNewCellTextView("TID", true));
-        row.addView(createNewCellTextView("Priority", true));
-        row.addView(createNewCellTextView("Tag", true));
-        row.addView(createNewCellTextView("Message", true));
+        if (checkBoxDateTimeVisibility.isChecked()) {
+            row.addView(createNewCellTextView("Date & Time", true));
+        }
+        if (checkBoxPidVisibility.isChecked()) {
+            row.addView(createNewCellTextView("PID", true));
+        }
+        if (checkBoxTidVisibility.isChecked()) {
+            row.addView(createNewCellTextView("TID", true));
+        }
+        if (checkBoxPriorityVisibility.isChecked()) {
+            row.addView(createNewCellTextView("Priority", true));
+        }
+        if (checkBoxTagVisibility.isChecked()) {
+            row.addView(createNewCellTextView("Tag", true));
+        }
+        if (checkBoxMassageVisibility.isChecked()) {
+            row.addView(createNewCellTextView("Message", true));
+        }
         tableLayout.addView(row);
-
     }
 
     private TextView createNewCellTextViewBody(String text, int color) {

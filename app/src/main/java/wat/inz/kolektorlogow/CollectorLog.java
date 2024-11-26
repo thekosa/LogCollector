@@ -70,6 +70,29 @@ public @Data class CollectorLog {
         }
     }
 
+    public List<String> getRowSelectively(boolean datetimeCheck, boolean pidCheck, boolean tidCheck, boolean priorityCheck, boolean tagCheck, boolean messageCheck) {
+        List<String> row = new ArrayList<>();
+        if (datetimeCheck) {
+            row.add(dateTime.toString());
+        }
+        if (pidCheck) {
+            row.add(pid);
+        }
+        if (tidCheck) {
+            row.add(tid);
+        }
+        if (priorityCheck) {
+            row.add(priority);
+        }
+        if (tagCheck) {
+            row.add(tag);
+        }
+        if (messageCheck) {
+            row.add(message);
+        }
+        return row;
+    }
+
     public List<String> getRow() {
         List<String> row = new ArrayList<>();
         row.add(dateTime.toString());

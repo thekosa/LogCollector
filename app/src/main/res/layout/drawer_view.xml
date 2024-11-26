@@ -72,40 +72,60 @@
                 android:textSize="20dp"
                 android:textStyle="bold" />
 
+            <Button
+                android:id="@+id/button_select_all_visibility"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:text="Zaznacz wszystkie" />
+
             <CheckBox
-                android:id="@+id/date_column_visible"
+                android:id="@+id/checkbox_datetime_visibility"
                 android:layout_width="match_parent"
                 android:layout_height="30dp"
+                android:layout_marginStart="20dp"
+                android:checked="true"
                 android:text="Date &amp; Time" />
 
             <CheckBox
-                android:id="@+id/pid_column_visible"
+                android:id="@+id/checkbox_pid_visibility"
                 android:layout_width="match_parent"
                 android:layout_height="30dp"
+                android:layout_marginStart="20dp"
+                android:checked="true"
                 android:text="PID" />
 
             <CheckBox
-                android:id="@+id/tid_column_visible"
+                android:id="@+id/checkbox_tid_visibility"
                 android:layout_width="match_parent"
                 android:layout_height="30dp"
+                android:layout_marginStart="20dp"
+                android:checked="true"
                 android:text="TID" />
 
             <CheckBox
-                android:id="@+id/priority_column_visible"
+                android:id="@+id/checkbox_priority_visibility"
                 android:layout_width="match_parent"
                 android:layout_height="30dp"
+                android:layout_marginStart="20dp"
+                android:checked="true"
                 android:text="Priority" />
 
             <CheckBox
-                android:id="@+id/tag_column_visible"
+                android:id="@+id/checkbox_tag_visibility"
                 android:layout_width="match_parent"
                 android:layout_height="30dp"
+                android:layout_marginStart="20dp"
+                android:checked="true"
                 android:text="Tag" />
 
             <CheckBox
-                android:id="@+id/massage_column_visible"
+                android:id="@+id/checkbox_massage_visibility"
                 android:layout_width="match_parent"
                 android:layout_height="30dp"
+                android:layout_marginStart="20dp"
+                android:checked="true"
                 android:text="Message" />
 
             <TextView
