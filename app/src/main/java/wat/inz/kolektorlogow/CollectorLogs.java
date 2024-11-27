@@ -31,21 +31,6 @@ public @Data class CollectorLogs {
         }
     }
 
-    public void generateLogs(BufferedReader stream, CollectorLogsFilter filter) {
-        try {
-            for (String logLine = stream.readLine(); logLine != null; logLine = stream.readLine()) {
-                CollectorLog log = new CollectorLog(logLine);
-                if (!log.isEmpty() && (filter.isNull() || log.isCorrect(filter))) {
-                    logsList.add(log);
-                }
-            }
-        } catch (IOException e) {
-            String err = "Błąd odczytu logów z konsoli. ";
-            Log.e("CollectorLogs.generateLogs", err, e);
-            System.err.println(err + e);
-        }
-    }
-
     public List<CollectorLog> filterOutLogs(CollectorLogsFilter collectorLogsFilter) {
         List<CollectorLog> logsListCopy = new ArrayList<>();
         for (CollectorLog log : logsList) {
@@ -58,10 +43,6 @@ public @Data class CollectorLogs {
 
     public void sortOutLogs(CollectorLogsSort collectorLogsSort) {
         logsList = collectorLogsSort.sort(logsList);
-    }
-
-    public int size() {
-        return logsList.size();
     }
 
     public void destroyLogsList() {

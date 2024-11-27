@@ -70,7 +70,7 @@ public @Data class CollectorLog {
         }
     }
 
-    public List<String> getRowSelectively(boolean datetimeCheck, boolean pidCheck, boolean tidCheck, boolean priorityCheck, boolean tagCheck, boolean messageCheck) {
+    public List<String> getRow(boolean datetimeCheck, boolean pidCheck, boolean tidCheck, boolean priorityCheck, boolean tagCheck, boolean messageCheck) {
         List<String> row = new ArrayList<>();
         if (datetimeCheck) {
             row.add(dateTime.toString());
@@ -90,17 +90,6 @@ public @Data class CollectorLog {
         if (messageCheck) {
             row.add(message);
         }
-        return row;
-    }
-
-    public List<String> getRow() {
-        List<String> row = new ArrayList<>();
-        row.add(dateTime.toString());
-        row.add(pid);
-        row.add(tid);
-        row.add(priority);
-        row.add(tag);
-        row.add(message);
         return row;
     }
 

@@ -34,10 +34,6 @@ public @Data class CollectorLogsFilter {
         this.tidFilter = null;
     }
 
-    public boolean isNull() {
-        return tagFilter == null && priorityFilter == null && pidFilter == null && tidFilter == null;
-    }
-
     private boolean isNull(String tagFilter, String priorityFilter, String pidFilter, String tidFilter) {
         return tagFilter == null && priorityFilter == null && pidFilter == null && tidFilter == null;
     }

@@ -185,14 +185,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             checkBoxMassageVisibility.setChecked(true);
         }
     }
-    //todo: opcja wyświetlania kolumn w silniku
     //todo: shizuku
 
     private void buildLogsListTableLayout() {
         resetTableLayout();
         for (CollectorLog log : collectorLogsFiltered.getLogsList()) {
             TableRow row = new TableRow(this);
-            for (String rowElement : log.getRowSelectively(
+            for (String rowElement : log.getRow(
                     checkBoxDateTimeVisibility.isChecked(),
                     checkBoxPidVisibility.isChecked(),
                     checkBoxTidVisibility.isChecked(),
