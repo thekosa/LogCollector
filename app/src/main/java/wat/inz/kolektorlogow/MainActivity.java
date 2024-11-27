@@ -104,6 +104,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         collectorLogsSort = new CollectorLogsSort("Date & Time", true);
 
         saveFiltersButton.setOnClickListener(this);
+        buttonSelectAllVisibility.setOnClickListener(this);
 
         priorityMap = new HashMap<>();
         priorityMap.put("Verbose", "V");
