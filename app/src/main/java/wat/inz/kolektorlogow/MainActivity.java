@@ -120,33 +120,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return super.onOptionsItemSelected(item);
     }
 
+    //todo: jeżeli nie ma połączenia z shizuku switch nie może być aktywny
     @Override
     public void onClick(View v) {
         if (v.getId() == buttonShizukuConnect.getId()) {
-            // Shizuku.addBinderReceivedListener(() -> {
             if (Shizuku.pingBinder()) {
                 Toast.makeText(this, "Shizuku is ready", Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(this, "Shizuku is not ready", Toast.LENGTH_SHORT).show();
             }
-            // });
+
             if (Shizuku.checkSelfPermission() != PackageManager.PERMISSION_GRANTED) {
                 Shizuku.requestPermission(0);
                 Toast.makeText(this, "Shizuku permission is not ok", Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(this, "Shizuku permission is ok", Toast.LENGTH_SHORT).show();
             }
-/*
-            if (Shizuku.pingBinder()) {
-                Toast.makeText(this, "Shizuku is connected", Toast.LENGTH_SHORT).show();
-                if (Shizuku.checkSelfPermission() != PackageManager.PERMISSION_GRANTED) {
-                    Toast.makeText(this, "Shizuku permission is not ok", Toast.LENGTH_SHORT).show();
-                    Shizuku.requestPermission(0);// Wywołanie żądania uprawnień
-                }
-            } else {
-                Toast.makeText(this, "Shizuku is not connected", Toast.LENGTH_SHORT).show();
-            }
-*/
         }
         //Przycisk Odświeżania listy logów
         if (v.getId() == refreshList.getId()) {
@@ -176,16 +165,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Toast.makeText(this, "Saved", Toast.LENGTH_SHORT).show();
             drawerLayout.closeDrawer(settingsBar);
         }
-        //Switch komendy adb
-        if (v.getId() == adbSwitch.getId()) {
-            logcatCommand = adbSwitch.isChecked() ? "adb logcat -d" : "logcat -d";
-            Toast.makeText(this, logcatCommand, Toast.LENGTH_SHORT).show();
-        }
     }
-    //todo: sortownie w silniku
-    //todo: opcja wyświetlania kolumn w silniku
-    //todo: zrobić dwie listy logów, jedna pierwotna zmieniana tylko w momencie odświeżenia listy, druga filtrowana, zmieniana podłóg potrzeb
-    //todo: naprawić filtrowanie po wszystkich priorytetach
 
     private void buildLogsListTableLayout() {
         resetTableLayout();
@@ -212,25 +192,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-    private void generateCommand(boolean adbSwitch, String tag, String priority) {
-        StringBuilder command = new StringBuilder();
-        if (adbSwitch) {
-            command.append("adb ");
-        }
-        command.append(logcatCommand);
-        boolean priorityIsNotUndefined = priority.compareTo("null") != 0 && priority.compareTo("*") != 0;
-        if (tag != null && priorityIsNotUndefined) {
-            command.append(tag).append(":").append(priority).append(" *:S");
-        } else if (tag != null && priority.compareTo("*") == 0) {
-            command.append(tag).append(":").append("V");
-        } else if (tag != null && priority.compareTo("null") == 0) {
-            command.append("|grep ").append(tag);
-        } else if (tag == null && priorityIsNotUndefined) {
-            command.append("|grep ").append(priority);
-        }
-        logcatCommand = command.toString();
-    }
-
     private TextView createNewCellTextView(String text, boolean bold, int color) {
         TextView cell = createNewCellTextView(text, bold);
         cell.setTextColor(color);
@@ -245,56 +206,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return cell;
     }
 
-    private void executeLogcatWithShizuku() {
-        try {
-            // Sprawdzenie, czy Shizuku jest gotowe
-            if (!Shizuku.pingBinder()) {
-                Toast.makeText(this, "Shizuku is not ready", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            // Wywołanie komendy w procesie z uprawnieniami
-            IBinder binder = Shizuku.getBinder();
-            ShizukuBinderWrapper wrapper = new ShizukuBinderWrapper(Shizuku.getBinder());
-            Parcel data = Parcel.obtain();
-            Parcel reply = Parcel.obtain();
-
-            // Przygotowanie polecenia logcat
-            String command = logcatCommand;
-//            data.writeStringArray(command.split(" "));
-            data.writeString(command);
-            System.out.println(data.readString());
-            //  ShizukuRemoteProcess process = new ShizukuRemoteProcess();
-            wrapper.transact(binder.FIRST_CALL_TRANSACTION, data, reply, 0);
-            // Wywołanie Shizuku binder
-            // binder.transact(IBinder.FIRST_CALL_TRANSACTION, data, reply, 0);
-//            Shizuku.transactRemote(data, reply, 0);
-
-            String result = reply.readString();
-//            Toast.makeText(this, result, Toast.LENGTH_SHORT).show();
-            // collectorLogs.destroyLogsList();
-            //  collectorLogs.generateLogs(reply.readString());
-            Shizuku.UserServiceArgs asd = new Shizuku.UserServiceArgs(this.getComponentName());
-
-            System.out.println(reply);
-            System.out.println(result);
-            System.out.println(Shizuku.getUid());
-            data.recycle();
-            reply.recycle();
-        } catch (Exception e) {
-            String err = "Error executing logcat with Shizuku.";
-            Toast.makeText(this, err, Toast.LENGTH_SHORT).show();
-            Log.e("Shizuku", err, e);
-            System.err.println(err + e);
-        }
-    }
-
 
     private void refreshLogList() {
         try {
-            Process process = Shizuku.newProcess(new String[]{"logcat", "-d", "|head"}, null, null);
-            ;
-            //  Process process = Runtime.getRuntime().exec(logcatCommand);
+            Process process;
+            if (adbSwitch.isChecked()) {
+                process = Shizuku.newProcess(logcatCommand.split(" "), null, null);
+            } else {
+                process = Runtime.getRuntime().exec(logcatCommand);
+            }
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             collectorLogs.destroyLogsList();
             collectorLogs.generateLogs(bufferedReader);
