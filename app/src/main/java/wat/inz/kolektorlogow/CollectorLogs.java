@@ -4,6 +4,7 @@ import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,11 +32,12 @@ public @Data class CollectorLogs {
         }
     }
 
-    public void generateLogs(BufferedReader stream, CollectorLogsFilter filter) {
+    public void generateLogs(String string) {
+        BufferedReader stream = new BufferedReader(new StringReader(string));
         try {
             for (String logLine = stream.readLine(); logLine != null; logLine = stream.readLine()) {
                 CollectorLog log = new CollectorLog(logLine);
-                if (!log.isEmpty() && (filter.isNull() || log.isCorrect(filter))) {
+                if (!log.isEmpty()) {
                     logsList.add(log);
                 }
             }
@@ -45,6 +47,7 @@ public @Data class CollectorLogs {
             System.err.println(err + e);
         }
     }
+
 
     public List<CollectorLog> filterOutLogs(CollectorLogsFilter filter) {
         List<CollectorLog> logsListCopy = new ArrayList<>();

@@ -4,11 +4,14 @@ import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.os.Parcel;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.Switch;
@@ -16,7 +19,6 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.EditText;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
@@ -32,7 +34,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import rikka.shizuku.Shizuku;
-import rikka.sui.Sui;
+import rikka.shizuku.ShizukuBinderWrapper;
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -53,12 +55,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Switch adbSwitch;
     private CollectorLogsFilter logsListFilter;
     private Map<String, String> priorityMap;
+    private Button buttonShizukuConnect;
 
     @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
+
+        buttonShizukuConnect = findViewById(R.id.button_Shizuku_connect);
 
         settingsBar = findViewById(R.id.navigation_view);
         saveFiltersButton = settingsBar.findViewById(R.id.save_button);
@@ -89,6 +94,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         priorityMap.put("Error", "E");
         priorityMap.put("Fatal", "F");
         priorityMap.put("*", null);
+
+
     }
 
     @Override
@@ -115,9 +122,35 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
+        if (v.getId() == buttonShizukuConnect.getId()) {
+            // Shizuku.addBinderReceivedListener(() -> {
+            if (Shizuku.pingBinder()) {
+                Toast.makeText(this, "Shizuku is ready", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Shizuku is not ready", Toast.LENGTH_SHORT).show();
+            }
+            // });
+            if (Shizuku.checkSelfPermission() != PackageManager.PERMISSION_GRANTED) {
+                Shizuku.requestPermission(0);
+                Toast.makeText(this, "Shizuku permission is not ok", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Shizuku permission is ok", Toast.LENGTH_SHORT).show();
+            }
+/*
+            if (Shizuku.pingBinder()) {
+                Toast.makeText(this, "Shizuku is connected", Toast.LENGTH_SHORT).show();
+                if (Shizuku.checkSelfPermission() != PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(this, "Shizuku permission is not ok", Toast.LENGTH_SHORT).show();
+                    Shizuku.requestPermission(0);// Wywołanie żądania uprawnień
+                }
+            } else {
+                Toast.makeText(this, "Shizuku is not connected", Toast.LENGTH_SHORT).show();
+            }
+*/
+        }
         //Przycisk Odświeżania listy logów
         if (v.getId() == refreshList.getId()) {
-            Sui.init(this.getPackageName());
+            //executeLogcatWithShizuku();
             refreshLogList();
             collectorLogsFiltered.setLogsList(collectorLogs.filterOutLogs(logsListFilter));
             buildLogsListTableLayout();
@@ -212,9 +245,56 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return cell;
     }
 
+    private void executeLogcatWithShizuku() {
+        try {
+            // Sprawdzenie, czy Shizuku jest gotowe
+            if (!Shizuku.pingBinder()) {
+                Toast.makeText(this, "Shizuku is not ready", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Wywołanie komendy w procesie z uprawnieniami
+            IBinder binder = Shizuku.getBinder();
+            ShizukuBinderWrapper wrapper = new ShizukuBinderWrapper(Shizuku.getBinder());
+            Parcel data = Parcel.obtain();
+            Parcel reply = Parcel.obtain();
+
+            // Przygotowanie polecenia logcat
+            String command = logcatCommand;
+//            data.writeStringArray(command.split(" "));
+            data.writeString(command);
+            System.out.println(data.readString());
+            //  ShizukuRemoteProcess process = new ShizukuRemoteProcess();
+            wrapper.transact(binder.FIRST_CALL_TRANSACTION, data, reply, 0);
+            // Wywołanie Shizuku binder
+            // binder.transact(IBinder.FIRST_CALL_TRANSACTION, data, reply, 0);
+//            Shizuku.transactRemote(data, reply, 0);
+
+            String result = reply.readString();
+//            Toast.makeText(this, result, Toast.LENGTH_SHORT).show();
+            // collectorLogs.destroyLogsList();
+            //  collectorLogs.generateLogs(reply.readString());
+            Shizuku.UserServiceArgs asd = new Shizuku.UserServiceArgs(this.getComponentName());
+
+            System.out.println(reply);
+            System.out.println(result);
+            System.out.println(Shizuku.getUid());
+            data.recycle();
+            reply.recycle();
+        } catch (Exception e) {
+            String err = "Error executing logcat with Shizuku.";
+            Toast.makeText(this, err, Toast.LENGTH_SHORT).show();
+            Log.e("Shizuku", err, e);
+            System.err.println(err + e);
+        }
+    }
+
+
     private void refreshLogList() {
         try {
-            Process process = Runtime.getRuntime().exec(logcatCommand);
+            Process process = Shizuku.newProcess(new String[]{"logcat", "-d", "|head"}, null, null);
+            ;
+            //  Process process = Runtime.getRuntime().exec(logcatCommand);
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             collectorLogs.destroyLogsList();
             collectorLogs.generateLogs(bufferedReader);
