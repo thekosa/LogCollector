@@ -49,5 +49,3 @@ public @Data class CollectorLogs {
         logsList.clear();
     }
 }
-
-}

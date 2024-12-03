@@ -115,7 +115,6 @@
                 </TableLayout>
             </HorizontalScrollView>
         </ScrollView>
-
     </LinearLayout>
 
     <com.google.android.material.navigation.NavigationView
