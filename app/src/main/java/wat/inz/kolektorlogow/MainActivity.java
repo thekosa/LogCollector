@@ -4,8 +4,6 @@ import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.os.IBinder;
-import android.os.Parcel;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -34,7 +32,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import rikka.shizuku.Shizuku;
-import rikka.shizuku.ShizukuBinderWrapper;
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -55,15 +52,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Switch adbSwitch;
     private CollectorLogsFilter logsListFilter;
     private Map<String, String> priorityMap;
-    private Button buttonShizukuConnect;
 
     @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
-
-        buttonShizukuConnect = findViewById(R.id.button_Shizuku_connect);
 
         settingsBar = findViewById(R.id.navigation_view);
         saveFiltersButton = settingsBar.findViewById(R.id.save_button);
@@ -120,26 +114,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return super.onOptionsItemSelected(item);
     }
 
-    //todo: jeżeli nie ma połączenia z shizuku switch nie może być aktywny
     @Override
     public void onClick(View v) {
-        if (v.getId() == buttonShizukuConnect.getId()) {
-            if (Shizuku.pingBinder()) {
-                Toast.makeText(this, "Shizuku is ready", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(this, "Shizuku is not ready", Toast.LENGTH_SHORT).show();
-            }
-
-            if (Shizuku.checkSelfPermission() != PackageManager.PERMISSION_GRANTED) {
-                Shizuku.requestPermission(0);
-                Toast.makeText(this, "Shizuku permission is not ok", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(this, "Shizuku permission is ok", Toast.LENGTH_SHORT).show();
-            }
-        }
         //Przycisk Odświeżania listy logów
         if (v.getId() == refreshList.getId()) {
-            //executeLogcatWithShizuku();
             refreshLogList();
             collectorLogsFiltered.setLogsList(collectorLogs.filterOutLogs(logsListFilter));
             buildLogsListTableLayout();
@@ -164,6 +142,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             buildLogsListTableLayout();
             Toast.makeText(this, "Saved", Toast.LENGTH_SHORT).show();
             drawerLayout.closeDrawer(settingsBar);
+        }
+        //Switch ADB
+        if (v.getId() == adbSwitch.getId()) {
+            try {
+                if (adbSwitch.isChecked()) {
+                    if (Shizuku.checkSelfPermission() != PackageManager.PERMISSION_GRANTED) {
+                        Shizuku.requestPermission(0);
+                        Toast.makeText(this, "Shizuku permission is not ok", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(this, "Shizuku permission is ok", Toast.LENGTH_SHORT).show();
+                    }
+                    if (Shizuku.pingBinder()) {
+                        Toast.makeText(this, "Shizuku is ready", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(this, "Shizuku is not ready", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            } catch (IllegalStateException e) {
+                Toast.makeText(this, "Włącz Shizuku", Toast.LENGTH_SHORT).show();
+                adbSwitch.setChecked(false);
+            }
         }
     }
 
