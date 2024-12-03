@@ -1,4 +1,4 @@
-package wat.inz.kolektorlogow;
+package wat.inz.kolektorlogow.collectorLog.collection;
 
 import android.util.Log;
 
@@ -8,6 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import lombok.Data;
+import wat.inz.kolektorlogow.collectorLog.log.CollectorLog;
+import wat.inz.kolektorlogow.collectorLog.modifiers.CollectorLogsFilter;
+import wat.inz.kolektorlogow.collectorLog.modifiers.CollectorLogsSort;
 
 public @Data class CollectorLogs {
     private List<CollectorLog> logsList;

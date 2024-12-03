@@ -1,4 +1,4 @@
-package wat.inz.kolektorlogow;
+package wat.inz.kolektorlogow.main;
 
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
@@ -33,6 +33,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import rikka.shizuku.Shizuku;
+import wat.inz.kolektorlogow.R;
+import wat.inz.kolektorlogow.collectorLog.log.CollectorLog;
+import wat.inz.kolektorlogow.collectorLog.collection.CollectorLogs;
+import wat.inz.kolektorlogow.collectorLog.modifiers.CollectorLogsFilter;
+import wat.inz.kolektorlogow.collectorLog.modifiers.CollectorLogsSort;
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {

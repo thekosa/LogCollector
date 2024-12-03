@@ -1,4 +1,4 @@
-package wat.inz.kolektorlogow;
+package wat.inz.kolektorlogow.collectorLog.modifiers;
 
 import java.util.Comparator;
 import java.util.HashMap;
@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import lombok.Data;
+import wat.inz.kolektorlogow.collectorLog.log.CollectorLog;
 
 public @Data class CollectorLogsSort {
     private String columnName;

@@ -1,4 +1,4 @@
-package wat.inz.kolektorlogow;
+package wat.inz.kolektorlogow.collectorLog.log;
 
 import android.graphics.Color;
 import android.util.Log;
@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Objects;
 
 import lombok.Data;
+import wat.inz.kolektorlogow.collectorLog.modifiers.CollectorLogsFilter;
 
 public @Data class CollectorLog {
     private CollectorLogDate dateTime;

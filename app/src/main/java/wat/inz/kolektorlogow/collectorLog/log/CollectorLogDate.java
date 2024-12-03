@@ -1,4 +1,4 @@
-package wat.inz.kolektorlogow;
+package wat.inz.kolektorlogow.collectorLog.log;
 
 import android.annotation.SuppressLint;
 
