@@ -48,5 +48,6 @@ public @Data class CollectorLogs {
     public void destroyLogsList() {
         logsList.clear();
     }
+}
 
 }

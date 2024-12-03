@@ -1,6 +1,7 @@
 package wat.inz.kolektorlogow;
 
 import android.annotation.SuppressLint;
+import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.util.Log;
@@ -10,6 +11,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.Switch;
@@ -17,11 +19,13 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.EditText;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+
 
 import com.google.android.material.navigation.NavigationView;
 
@@ -29,7 +33,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import rikka.shizuku.Shizuku;
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -171,10 +178,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Toast.makeText(this, "Saved", Toast.LENGTH_SHORT).show();
             drawerLayout.closeDrawer(settingsBar);
         }
-        //Switch komendy adb
+        //Switch ADB
         if (v.getId() == adbSwitch.getId()) {
-            logcatCommand = adbSwitch.isChecked() ? "adb logcat -d -v year" : "logcat -d -v year";
-            Toast.makeText(this, logcatCommand, Toast.LENGTH_SHORT).show();
+            try {
+                if (adbSwitch.isChecked()) {
+                    if (Shizuku.checkSelfPermission() != PackageManager.PERMISSION_GRANTED) {
+                        Shizuku.requestPermission(0);
+                        Toast.makeText(this, "Shizuku permission is not ok", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(this, "Shizuku permission is ok", Toast.LENGTH_SHORT).show();
+                    }
+                    if (Shizuku.pingBinder()) {
+                        Toast.makeText(this, "Shizuku is ready", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(this, "Shizuku is not ready", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            } catch (IllegalStateException e) {
+                Toast.makeText(this, "Włącz Shizuku", Toast.LENGTH_SHORT).show();
+                adbSwitch.setChecked(false);
+            }
         }
         //Przycisk zaznaczenia wszystkich kolumn
         if (v.getId() == buttonSelectAllVisibility.getId()) {
@@ -186,7 +209,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             checkBoxMassageVisibility.setChecked(true);
         }
     }
-    //todo: shizuku
 
     private void buildLogsListTableLayout() {
         resetTableLayout();
@@ -245,7 +267,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void refreshLogList() {
         try {
-            Process process = Runtime.getRuntime().exec(logcatCommand);
+            Process process;
+            if (adbSwitch.isChecked()) {
+                process = Shizuku.newProcess(logcatCommand.split(" "), null, null);
+            } else {
+                process = Runtime.getRuntime().exec(logcatCommand);
+            }
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             collectorLogs.destroyLogsList();
             collectorLogs.generateLogs(bufferedReader);
