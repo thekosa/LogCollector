@@ -26,11 +26,11 @@ public @Data class CollectorLog {
     public CollectorLog(String logLine) {
         setLog(logLine);
         priorityMap.put("Verbose", Color.GRAY);
-
         priorityMap.put("Debug", Color.GREEN);
         priorityMap.put("Info", Color.BLUE);
         priorityMap.put("Warning", Color.YELLOW);
         priorityMap.put("Error", Color.RED);
+        priorityMap.put("Fatal", Color.MAGENTA);
     }
 
     public void setLog(String logLine) {
