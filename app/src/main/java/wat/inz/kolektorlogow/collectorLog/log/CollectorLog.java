@@ -34,7 +34,9 @@ public @Data class CollectorLog {
     }
 
     public void setLog(String logLine) {
-        if (logLine.contains("--------- beginning") || logLine.contains("Zabieram się za pracę nad logiem")) {
+        if (logLine.contains("--------- beginning")
+                || logLine.contains("Zabieram się za pracę nad logiem")
+                || logLine.contains("OgnistyMagazyn")) {
             return;
         }
         Log.i("CollectorLog.setLog", "Zabieram się za pracę nad logiem: " + logLine);

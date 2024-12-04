@@ -25,6 +25,7 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -34,13 +35,14 @@ import java.util.Map;
 
 import rikka.shizuku.Shizuku;
 import wat.inz.kolektorlogow.R;
-import wat.inz.kolektorlogow.collectorLog.log.CollectorLog;
 import wat.inz.kolektorlogow.collectorLog.collection.CollectorLogs;
+import wat.inz.kolektorlogow.collectorLog.log.CollectorLog;
 import wat.inz.kolektorlogow.collectorLog.modifiers.CollectorLogsFilter;
 import wat.inz.kolektorlogow.collectorLog.modifiers.CollectorLogsSort;
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+    public static FirebaseFirestore db;
     private Button refreshList;
     private TableLayout tableLayout;
     private String logcatCommand;
@@ -75,6 +77,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
+
+        db = FirebaseFirestore.getInstance();
 
         settingsBar = findViewById(R.id.navigation_view);
         saveFiltersButton = settingsBar.findViewById(R.id.save_button);
