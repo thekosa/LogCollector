@@ -24,17 +24,14 @@ public @Data class CollectorLogs {
 
     public void generateLogs(BufferedReader stream) {
         try {
-            // int i = 0;
+            int logCount = 0;
             for (String logLine = stream.readLine(); logLine != null; logLine = stream.readLine()) {
                 CollectorLog log = new CollectorLog(logLine);
                 if (!log.isEmpty()) {
-                    /*
-                    if (++i >= 10) {
-                        //Log.e("CollectorLogs.generateLogs", "Za dużo logów.");
-                        return;
+                    //Limit of 2000 logs, because of device memory, with adb setting there could be a lot more than 2000 logs
+                    if (logCount++ < 2000) {
+                        logsList.add(log);
                     }
-                    */
-                    logsList.add(log);
                     saveLog(new FirestoreLog(log));
                 }
             }
