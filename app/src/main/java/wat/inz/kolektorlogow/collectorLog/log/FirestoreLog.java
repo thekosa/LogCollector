@@ -1,6 +1,7 @@
 package wat.inz.kolektorlogow.collectorLog.log;
 
 import lombok.Getter;
+import lombok.Setter;
 
 public @Getter class FirestoreLog {
     private CollectorLogDate dateTime;
@@ -9,6 +10,9 @@ public @Getter class FirestoreLog {
     private String priority;
     private String tag;
     private String message;
+    private long ordinalNumber; //Firestore doesn't serialize static fields
+    @Setter
+    private static long staticOrdinalNumber;
 
     public FirestoreLog(CollectorLog log) {
         this.dateTime = log.getDateTime();
@@ -17,5 +21,6 @@ public @Getter class FirestoreLog {
         this.priority = log.getPriority();
         this.tag = log.getTag();
         this.message = log.getMessage();
+        ordinalNumber = ++staticOrdinalNumber;
     }
 }

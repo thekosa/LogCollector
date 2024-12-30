@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import rikka.shizuku.Shizuku;
+import wat.inz.kolektorlogow.DAO.FirestoreLogDAO;
 import wat.inz.kolektorlogow.R;
 import wat.inz.kolektorlogow.collectorLog.collection.CollectorLogs;
 import wat.inz.kolektorlogow.collectorLog.log.CollectorLog;
@@ -42,8 +43,8 @@ import wat.inz.kolektorlogow.collectorLog.modifiers.CollectorLogsSort;
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
-    public static FirebaseFirestore db;
-    private Button refreshList;
+    private FirebaseFirestore dbConnection;
+    private Button refreshListButton;
     private TableLayout tableLayout;
     private String logcatCommand;
     private CollectorLogs collectorLogs;
@@ -78,7 +79,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
 
-        db = FirebaseFirestore.getInstance();
+        dbConnection = FirebaseFirestore.getInstance();
 
         settingsBar = findViewById(R.id.navigation_view);
         saveFiltersButton = settingsBar.findViewById(R.id.save_button);
@@ -92,7 +93,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         drawerLayout = findViewById(R.id.drawer_layout);
         settingsButton = findViewById(R.id.settings_button);
         settingsButton.setEnabled(false);
-        refreshList = findViewById(R.id.refreshList);
+        refreshListButton = findViewById(R.id.refreshList);
+        refreshListButton.setEnabled(false);
         tableLayout = findViewById(R.id.tableLayout);
         adbSwitch = findViewById(R.id.adb_switch);
         buttonSelectAllVisibility = findViewById(R.id.button_select_all_visibility);
@@ -126,6 +128,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         priorityMap.put("Error", "E");
         priorityMap.put("Fatal", "F");
         priorityMap.put("*", null);
+
+        new FirestoreLogDAO(dbConnection).setOrdinalNumber(() -> refreshListButton.setEnabled(true));
     }
 
     @Override
@@ -153,7 +157,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View v) {
         //Przycisk Odświeżania listy logów
-        if (v.getId() == refreshList.getId()) {
+        if (v.getId() == refreshListButton.getId()) {
             refreshLogList();
             collectorLogs.sortOutLogs(collectorLogsSort);
             collectorLogsFiltered.setLogsList(collectorLogs.filterOutLogs(collectorLogsFilter));
@@ -284,7 +288,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             collectorLogs.destroyLogsList();
-            collectorLogs.generateLogs(bufferedReader);
+            collectorLogs.generateLogs(bufferedReader, dbConnection);
             bufferedReader.close();
         } catch (IOException e) {
             String err = "Błąd polecenia logcat. ";
