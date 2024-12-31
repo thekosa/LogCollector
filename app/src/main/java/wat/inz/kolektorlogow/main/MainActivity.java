@@ -42,9 +42,9 @@ import wat.inz.kolektorlogow.collectorLog.modifiers.CollectorLogsFilter;
 import wat.inz.kolektorlogow.collectorLog.modifiers.CollectorLogsSort;
 
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+public class MainActivity extends AppCompatActivity {
     private FirebaseFirestore dbConnection;
-    private Button refreshLogsListButton;
+    private Button refreshLogListButton;
     private TableLayout logsListTableLayout;
     private String logcatCommand;
     private CollectorLogs collectorLogs;
@@ -52,7 +52,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private DrawerLayout drawerLayout;
     private ImageButton settingsButton;
     private NavigationView settingsBarNavigationView;
-    private Button saveFiltersButton;
     private Spinner priorityFilterSpinner;
     private EditText tagFilterEditText;
     private EditText pidFilterEditText;
@@ -64,7 +63,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Map<String, String> priorityMap;
     private Spinner columnSortSpinner;
     private Spinner directionSortSpinner;
-    private Button selectAllColumnsVisibilityButton;
     private CheckBox dateTimeColumnVisibilityCheckBox;
     private CheckBox pidColumnVisibilityCheckBox;
     private CheckBox tidColumnVisibilityCheckBox;
@@ -86,16 +84,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         tidFilterEditText = settingsBarNavigationView.findViewById(R.id.tid_filter_edittext);
         columnSortSpinner = settingsBarNavigationView.findViewById(R.id.column_sort_spinner);
         directionSortSpinner = settingsBarNavigationView.findViewById(R.id.direction_sort_spinner);
-        saveFiltersButton = settingsBarNavigationView.findViewById(R.id.save_filters_button);
 
         drawerLayout = findViewById(R.id.drawer_layout);
         settingsButton = findViewById(R.id.settings_button);
         settingsButton.setEnabled(false);
-        refreshLogsListButton = findViewById(R.id.refresh_logs_list_button);
-        refreshLogsListButton.setEnabled(false);
+        refreshLogListButton = findViewById(R.id.refresh_log_list_button);
+        refreshLogListButton.setEnabled(false);
         logsListTableLayout = findViewById(R.id.logs_list_table_layout);
         adbSwitch = findViewById(R.id.adb_switch);
-        selectAllColumnsVisibilityButton = findViewById(R.id.select_all_columns_visibility_button);
         dateTimeColumnVisibilityCheckBox = findViewById(R.id.datetime_column_visibility_checkbox);
         pidColumnVisibilityCheckBox = findViewById(R.id.pid_column_visibility_checkbox);
         tidColumnVisibilityCheckBox = findViewById(R.id.tid_column_visibility_checkbox);
@@ -115,9 +111,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         collectorLogsFilter = new CollectorLogsFilter(null, null, null, null);
         collectorLogsSort = new CollectorLogsSort("Date & Time", true);
 
-        saveFiltersButton.setOnClickListener(this);
-        selectAllColumnsVisibilityButton.setOnClickListener(this);
-
         priorityMap = new HashMap<>();
         priorityMap.put("Verbose", "V");
         priorityMap.put("Debug", "D");
@@ -128,7 +121,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         priorityMap.put("*", null);
 
         dbConnection = FirebaseFirestore.getInstance();
-        new FirestoreLogDAO(dbConnection).setOrdinalNumber(() -> refreshLogsListButton.setEnabled(true));
+        new FirestoreLogDAO(dbConnection).setOrdinalNumber(() -> refreshLogListButton.setEnabled(true));
     }
 
     @Override
@@ -153,71 +146,67 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void onClick(View v) {
-        //Przycisk Odświeżania listy logów
-        if (v.getId() == refreshLogsListButton.getId()) {
-            refreshLogList();
-            collectorLogs.sortOutLogs(collectorLogsSort);
-            collectorLogsFiltered.setLogsList(collectorLogs.filterOutLogs(collectorLogsFilter));
-            buildLogsListTableLayout();
-            if (!settingsButton.isEnabled()) {
-                settingsButton.setEnabled(true);
-                settingsButton.setAlpha(1.0f);
-                settingsButton.setBackgroundColor(ContextCompat.getColor(this, R.color.purple_500));
-            }
+    public void onRefreshLogsListButtonClick(View view) {
+        refreshLogList();
+        collectorLogs.sortOutLogs(collectorLogsSort);
+        collectorLogsFiltered.setLogsList(collectorLogs.filterOutLogs(collectorLogsFilter));
+        buildLogsListTableLayout();
+        if (!settingsButton.isEnabled()) {
+            settingsButton.setEnabled(true);
+            settingsButton.setAlpha(1.0f);
+            settingsButton.setBackgroundColor(ContextCompat.getColor(this, R.color.purple_500));
         }
-        //Przycisk Wyświetlania belki filtrów
-        if (v.getId() == settingsButton.getId()) {
-            Toast.makeText(this, "Filter", Toast.LENGTH_SHORT).show();
-            drawerLayout.openDrawer(GravityCompat.END);
-        }
-        //Przycisk Zapisywania filtrów
-        if (v.getId() == saveFiltersButton.getId()) {
-            collectorLogsSort.setColumnName(columnSortSpinner.getSelectedItem().toString());
-            collectorLogsSort.setDirection(directionSortSpinner.getSelectedItem().toString().equals("Ascendingly"));
-            collectorLogs.sortOutLogs(collectorLogsSort);
-            collectorLogsFilter.setFilter(
-                    tagFilterEditText.getText().toString(),
-                    priorityMap.get(priorityFilterSpinner.getSelectedItem().toString()),
-                    pidFilterEditText.getText().toString(),
-                    tidFilterEditText.getText().toString()
-            );
-            collectorLogsFiltered.setLogsList(collectorLogs.filterOutLogs(collectorLogsFilter));
-            buildLogsListTableLayout();
-            Toast.makeText(this, "Saved", Toast.LENGTH_SHORT).show();
-            drawerLayout.closeDrawer(settingsBarNavigationView);
-        }
-        //Switch ADB
-        if (v.getId() == adbSwitch.getId()) {
-            try {
-                if (adbSwitch.isChecked()) {
-                    if (Shizuku.checkSelfPermission() != PackageManager.PERMISSION_GRANTED) {
-                        Shizuku.requestPermission(0);
-                        Toast.makeText(this, "Shizuku permission is not ok", Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(this, "Shizuku permission is ok", Toast.LENGTH_SHORT).show();
-                    }
-                    if (Shizuku.pingBinder()) {
-                        Toast.makeText(this, "Shizuku is ready", Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(this, "Shizuku is not ready", Toast.LENGTH_SHORT).show();
-                    }
+    }
+
+    public void onSettingsButtonClick(View view) {
+        Toast.makeText(this, "Filter", Toast.LENGTH_SHORT).show();
+        drawerLayout.openDrawer(GravityCompat.END);
+    }
+
+    public void onSaveFiltersButtonClick(View view) {
+        collectorLogsSort.setColumnName(columnSortSpinner.getSelectedItem().toString());
+        collectorLogsSort.setDirection(directionSortSpinner.getSelectedItem().toString().equals("Ascendingly"));
+        collectorLogs.sortOutLogs(collectorLogsSort);
+        collectorLogsFilter.setFilter(
+                tagFilterEditText.getText().toString(),
+                priorityMap.get(priorityFilterSpinner.getSelectedItem().toString()),
+                pidFilterEditText.getText().toString(),
+                tidFilterEditText.getText().toString()
+        );
+        collectorLogsFiltered.setLogsList(collectorLogs.filterOutLogs(collectorLogsFilter));
+        buildLogsListTableLayout();
+        Toast.makeText(this, "Saved", Toast.LENGTH_SHORT).show();
+        drawerLayout.closeDrawer(settingsBarNavigationView);
+    }
+
+    public void onAdbSwitchClick(View view) {
+        try {
+            if (adbSwitch.isChecked()) {
+                if (Shizuku.checkSelfPermission() != PackageManager.PERMISSION_GRANTED) {
+                    Shizuku.requestPermission(0);
+                    Toast.makeText(this, "Shizuku permission is not ok", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "Shizuku permission is ok", Toast.LENGTH_SHORT).show();
                 }
-            } catch (IllegalStateException e) {
-                Toast.makeText(this, "Włącz Shizuku", Toast.LENGTH_SHORT).show();
-                adbSwitch.setChecked(false);
+                if (Shizuku.pingBinder()) {
+                    Toast.makeText(this, "Shizuku is ready", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "Shizuku is not ready", Toast.LENGTH_SHORT).show();
+                }
             }
+        } catch (IllegalStateException e) {
+            Toast.makeText(this, "Włącz Shizuku", Toast.LENGTH_SHORT).show();
+            adbSwitch.setChecked(false);
         }
-        //Przycisk zaznaczenia wszystkich kolumn
-        if (v.getId() == selectAllColumnsVisibilityButton.getId()) {
-            dateTimeColumnVisibilityCheckBox.setChecked(true);
-            pidColumnVisibilityCheckBox.setChecked(true);
-            tidColumnVisibilityCheckBox.setChecked(true);
-            priorityColumnVisibilityCheckBox.setChecked(true);
-            tagColumnVisibilityCheckBox.setChecked(true);
-            messageColumnVisibilityCheckBox.setChecked(true);
-        }
+    }
+
+    public void onSelectAllColumnsVisibilityButtonClick(View view) {
+        dateTimeColumnVisibilityCheckBox.setChecked(true);
+        pidColumnVisibilityCheckBox.setChecked(true);
+        tidColumnVisibilityCheckBox.setChecked(true);
+        priorityColumnVisibilityCheckBox.setChecked(true);
+        tagColumnVisibilityCheckBox.setChecked(true);
+        messageColumnVisibilityCheckBox.setChecked(true);
     }
 
     private void buildLogsListTableLayout() {
@@ -297,4 +286,5 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             System.err.println(err + e);
         }
     }
+
 }

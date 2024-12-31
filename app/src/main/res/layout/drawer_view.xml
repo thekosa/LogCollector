@@ -73,11 +73,11 @@
                 android:textStyle="bold" />
 
             <Button
-                android:id="@+id/select_all_columns_visibility_button"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:layout_marginStart="10dp"
                 android:layout_marginEnd="10dp"
+                android:onClick="onSelectAllColumnsVisibilityButtonClick"
                 android:text="Zaznacz wszystkie" />
 
             <CheckBox
@@ -148,9 +148,9 @@
                 android:entries="@array/direction_sort" />
 
             <Button
-                android:id="@+id/save_filters_button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:onClick="onSaveFiltersButtonClick"
                 android:text="Zastosuj" />
         </LinearLayout>
     </ScrollView>
