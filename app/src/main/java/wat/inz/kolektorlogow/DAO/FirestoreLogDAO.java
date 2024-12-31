@@ -39,8 +39,8 @@ public class FirestoreLogDAO {
             if (queryDocumentSnapshots.isEmpty()) {
                 FirestoreLog.setStaticOrdinalNumber(0);
             } else {
-                Object maxON = queryDocumentSnapshots.getDocuments().get(0).get("ordinalNumber");
-                FirestoreLog.setStaticOrdinalNumber(maxON == null ? 0 : (long) maxON);
+                Object maxOrdinalNnumber = queryDocumentSnapshots.getDocuments().get(0).get("ordinalNumber");
+                FirestoreLog.setStaticOrdinalNumber(maxOrdinalNnumber == null ? 0 : (long) maxOrdinalNnumber);
             }
             if (callback != null) {
                 callback.run();

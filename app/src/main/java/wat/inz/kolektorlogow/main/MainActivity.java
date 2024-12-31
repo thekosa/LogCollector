@@ -44,33 +44,33 @@ import wat.inz.kolektorlogow.collectorLog.modifiers.CollectorLogsSort;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private FirebaseFirestore dbConnection;
-    private Button refreshListButton;
-    private TableLayout tableLayout;
+    private Button refreshLogsListButton;
+    private TableLayout logsListTableLayout;
     private String logcatCommand;
     private CollectorLogs collectorLogs;
     private CollectorLogs collectorLogsFiltered;
     private DrawerLayout drawerLayout;
     private ImageButton settingsButton;
-    private NavigationView settingsBar;
+    private NavigationView settingsBarNavigationView;
     private Button saveFiltersButton;
-    private Spinner prioritySpinner;
-    private EditText tagInput;
-    private EditText pidInput;
-    private EditText tidInput;
+    private Spinner priorityFilterSpinner;
+    private EditText tagFilterEditText;
+    private EditText pidFilterEditText;
+    private EditText tidFilterEditText;
     @SuppressLint("UseSwitchCompatOrMaterialCode")
     private Switch adbSwitch;
     private CollectorLogsFilter collectorLogsFilter;
     private CollectorLogsSort collectorLogsSort;
     private Map<String, String> priorityMap;
-    private Spinner spinnerSortColumnName;
-    private Spinner spinnerSortDirection;
-    private Button buttonSelectAllVisibility;
-    private CheckBox checkBoxDateTimeVisibility;
-    private CheckBox checkBoxPidVisibility;
-    private CheckBox checkBoxTidVisibility;
-    private CheckBox checkBoxPriorityVisibility;
-    private CheckBox checkBoxTagVisibility;
-    private CheckBox checkBoxMassageVisibility;
+    private Spinner columnSortSpinner;
+    private Spinner directionSortSpinner;
+    private Button selectAllColumnsVisibilityButton;
+    private CheckBox dateTimeColumnVisibilityCheckBox;
+    private CheckBox pidColumnVisibilityCheckBox;
+    private CheckBox tidColumnVisibilityCheckBox;
+    private CheckBox priorityColumnVisibilityCheckBox;
+    private CheckBox tagColumnVisibilityCheckBox;
+    private CheckBox messageColumnVisibilityCheckBox;
 
 
     @SuppressLint("MissingInflatedId")
@@ -79,37 +79,35 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
 
-        dbConnection = FirebaseFirestore.getInstance();
-
-        settingsBar = findViewById(R.id.navigation_view);
-        saveFiltersButton = settingsBar.findViewById(R.id.save_button);
-        prioritySpinner = settingsBar.findViewById(R.id.priority_spinner);
-        tagInput = settingsBar.findViewById(R.id.tag_input);
-        pidInput = settingsBar.findViewById(R.id.pid_input);
-        tidInput = settingsBar.findViewById(R.id.tid_input);
-        spinnerSortColumnName = findViewById(R.id.column_sort);
-        spinnerSortDirection = findViewById(R.id.direction_sort);
+        settingsBarNavigationView = findViewById(R.id.settings_bar_navigation_view);
+        priorityFilterSpinner = settingsBarNavigationView.findViewById(R.id.priority_filter_spinner);
+        tagFilterEditText = settingsBarNavigationView.findViewById(R.id.tag_filter_edittext);
+        pidFilterEditText = settingsBarNavigationView.findViewById(R.id.pid_filter_edittext);
+        tidFilterEditText = settingsBarNavigationView.findViewById(R.id.tid_filter_edittext);
+        columnSortSpinner = settingsBarNavigationView.findViewById(R.id.column_sort_spinner);
+        directionSortSpinner = settingsBarNavigationView.findViewById(R.id.direction_sort_spinner);
+        saveFiltersButton = settingsBarNavigationView.findViewById(R.id.save_filters_button);
 
         drawerLayout = findViewById(R.id.drawer_layout);
         settingsButton = findViewById(R.id.settings_button);
         settingsButton.setEnabled(false);
-        refreshListButton = findViewById(R.id.refreshList);
-        refreshListButton.setEnabled(false);
-        tableLayout = findViewById(R.id.tableLayout);
+        refreshLogsListButton = findViewById(R.id.refresh_logs_list_button);
+        refreshLogsListButton.setEnabled(false);
+        logsListTableLayout = findViewById(R.id.logs_list_table_layout);
         adbSwitch = findViewById(R.id.adb_switch);
-        buttonSelectAllVisibility = findViewById(R.id.button_select_all_visibility);
-        checkBoxDateTimeVisibility = findViewById(R.id.checkbox_datetime_visibility);
-        checkBoxPidVisibility = findViewById(R.id.checkbox_pid_visibility);
-        checkBoxTidVisibility = findViewById(R.id.checkbox_tid_visibility);
-        checkBoxPriorityVisibility = findViewById(R.id.checkbox_priority_visibility);
-        checkBoxTagVisibility = findViewById(R.id.checkbox_tag_visibility);
-        checkBoxMassageVisibility = findViewById(R.id.checkbox_massage_visibility);
-        checkBoxDateTimeVisibility.setChecked(true);
-        checkBoxPidVisibility.setChecked(true);
-        checkBoxTidVisibility.setChecked(true);
-        checkBoxPriorityVisibility.setChecked(true);
-        checkBoxTagVisibility.setChecked(true);
-        checkBoxMassageVisibility.setChecked(true);
+        selectAllColumnsVisibilityButton = findViewById(R.id.select_all_columns_visibility_button);
+        dateTimeColumnVisibilityCheckBox = findViewById(R.id.datetime_column_visibility_checkbox);
+        pidColumnVisibilityCheckBox = findViewById(R.id.pid_column_visibility_checkbox);
+        tidColumnVisibilityCheckBox = findViewById(R.id.tid_column_visibility_checkbox);
+        priorityColumnVisibilityCheckBox = findViewById(R.id.priority_column_visibility_checkbox);
+        tagColumnVisibilityCheckBox = findViewById(R.id.tag_column_visibility_checkbox);
+        messageColumnVisibilityCheckBox = findViewById(R.id.message_column_visibility_checkbox);
+        dateTimeColumnVisibilityCheckBox.setChecked(true);
+        pidColumnVisibilityCheckBox.setChecked(true);
+        tidColumnVisibilityCheckBox.setChecked(true);
+        priorityColumnVisibilityCheckBox.setChecked(true);
+        tagColumnVisibilityCheckBox.setChecked(true);
+        messageColumnVisibilityCheckBox.setChecked(true);
 
         logcatCommand = "logcat -d -v year";
         collectorLogs = new CollectorLogs();
@@ -118,7 +116,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         collectorLogsSort = new CollectorLogsSort("Date & Time", true);
 
         saveFiltersButton.setOnClickListener(this);
-        buttonSelectAllVisibility.setOnClickListener(this);
+        selectAllColumnsVisibilityButton.setOnClickListener(this);
 
         priorityMap = new HashMap<>();
         priorityMap.put("Verbose", "V");
@@ -129,7 +127,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         priorityMap.put("Fatal", "F");
         priorityMap.put("*", null);
 
-        new FirestoreLogDAO(dbConnection).setOrdinalNumber(() -> refreshListButton.setEnabled(true));
+        dbConnection = FirebaseFirestore.getInstance();
+        new FirestoreLogDAO(dbConnection).setOrdinalNumber(() -> refreshLogsListButton.setEnabled(true));
     }
 
     @Override
@@ -157,7 +156,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View v) {
         //Przycisk Odświeżania listy logów
-        if (v.getId() == refreshListButton.getId()) {
+        if (v.getId() == refreshLogsListButton.getId()) {
             refreshLogList();
             collectorLogs.sortOutLogs(collectorLogsSort);
             collectorLogsFiltered.setLogsList(collectorLogs.filterOutLogs(collectorLogsFilter));
@@ -175,17 +174,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         //Przycisk Zapisywania filtrów
         if (v.getId() == saveFiltersButton.getId()) {
-            collectorLogsSort.setColumnName(spinnerSortColumnName.getSelectedItem().toString());
-            collectorLogsSort.setDirection(spinnerSortDirection.getSelectedItem().toString().equals("Ascendingly"));
+            collectorLogsSort.setColumnName(columnSortSpinner.getSelectedItem().toString());
+            collectorLogsSort.setDirection(directionSortSpinner.getSelectedItem().toString().equals("Ascendingly"));
             collectorLogs.sortOutLogs(collectorLogsSort);
-            collectorLogsFilter.setFilter(tagInput.getText().toString(),
-                    priorityMap.get(prioritySpinner.getSelectedItem().toString()),
-                    pidInput.getText().toString(),
-                    tidInput.getText().toString());
+            collectorLogsFilter.setFilter(
+                    tagFilterEditText.getText().toString(),
+                    priorityMap.get(priorityFilterSpinner.getSelectedItem().toString()),
+                    pidFilterEditText.getText().toString(),
+                    tidFilterEditText.getText().toString()
+            );
             collectorLogsFiltered.setLogsList(collectorLogs.filterOutLogs(collectorLogsFilter));
             buildLogsListTableLayout();
             Toast.makeText(this, "Saved", Toast.LENGTH_SHORT).show();
-            drawerLayout.closeDrawer(settingsBar);
+            drawerLayout.closeDrawer(settingsBarNavigationView);
         }
         //Switch ADB
         if (v.getId() == adbSwitch.getId()) {
@@ -209,13 +210,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         }
         //Przycisk zaznaczenia wszystkich kolumn
-        if (v.getId() == buttonSelectAllVisibility.getId()) {
-            checkBoxDateTimeVisibility.setChecked(true);
-            checkBoxPidVisibility.setChecked(true);
-            checkBoxTidVisibility.setChecked(true);
-            checkBoxPriorityVisibility.setChecked(true);
-            checkBoxTagVisibility.setChecked(true);
-            checkBoxMassageVisibility.setChecked(true);
+        if (v.getId() == selectAllColumnsVisibilityButton.getId()) {
+            dateTimeColumnVisibilityCheckBox.setChecked(true);
+            pidColumnVisibilityCheckBox.setChecked(true);
+            tidColumnVisibilityCheckBox.setChecked(true);
+            priorityColumnVisibilityCheckBox.setChecked(true);
+            tagColumnVisibilityCheckBox.setChecked(true);
+            messageColumnVisibilityCheckBox.setChecked(true);
         }
     }
 
@@ -224,40 +225,40 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         for (CollectorLog log : collectorLogsFiltered.getLogsList()) {
             TableRow row = new TableRow(this);
             for (String rowElement : log.getRow(
-                    checkBoxDateTimeVisibility.isChecked(),
-                    checkBoxPidVisibility.isChecked(),
-                    checkBoxTidVisibility.isChecked(),
-                    checkBoxPriorityVisibility.isChecked(),
-                    checkBoxTagVisibility.isChecked(),
-                    checkBoxMassageVisibility.isChecked())) {
+                    dateTimeColumnVisibilityCheckBox.isChecked(),
+                    pidColumnVisibilityCheckBox.isChecked(),
+                    tidColumnVisibilityCheckBox.isChecked(),
+                    priorityColumnVisibilityCheckBox.isChecked(),
+                    tagColumnVisibilityCheckBox.isChecked(),
+                    messageColumnVisibilityCheckBox.isChecked())) {
                 row.addView(createNewCellTextViewBody(rowElement, log.getColor()));
             }
-            tableLayout.addView(row);
+            logsListTableLayout.addView(row);
         }
     }
 
     private void resetTableLayout() {
-        tableLayout.removeAllViews();
+        logsListTableLayout.removeAllViews();
         TableRow row = new TableRow(this);
-        if (checkBoxDateTimeVisibility.isChecked()) {
+        if (dateTimeColumnVisibilityCheckBox.isChecked()) {
             row.addView(createNewCellTextView("Date & Time", true));
         }
-        if (checkBoxPidVisibility.isChecked()) {
+        if (pidColumnVisibilityCheckBox.isChecked()) {
             row.addView(createNewCellTextView("PID", true));
         }
-        if (checkBoxTidVisibility.isChecked()) {
+        if (tidColumnVisibilityCheckBox.isChecked()) {
             row.addView(createNewCellTextView("TID", true));
         }
-        if (checkBoxPriorityVisibility.isChecked()) {
+        if (priorityColumnVisibilityCheckBox.isChecked()) {
             row.addView(createNewCellTextView("Priority", true));
         }
-        if (checkBoxTagVisibility.isChecked()) {
+        if (tagColumnVisibilityCheckBox.isChecked()) {
             row.addView(createNewCellTextView("Tag", true));
         }
-        if (checkBoxMassageVisibility.isChecked()) {
+        if (messageColumnVisibilityCheckBox.isChecked()) {
             row.addView(createNewCellTextView("Message", true));
         }
-        tableLayout.addView(row);
+        logsListTableLayout.addView(row);
     }
 
     private TextView createNewCellTextViewBody(String text, int color) {

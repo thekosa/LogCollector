@@ -26,7 +26,7 @@
             android:layout_margin="10dp">
 
             <Button
-                android:id="@+id/refreshList"
+                android:id="@+id/refresh_logs_list_button"
                 style="@style/ShapeAppearance.MaterialComponents.LargeComponent"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
@@ -63,7 +63,7 @@
 
 
                 <TableLayout
-                    android:id="@+id/tableLayout"
+                    android:id="@+id/logs_list_table_layout"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="16dp">
@@ -118,7 +118,7 @@
     </LinearLayout>
 
     <com.google.android.material.navigation.NavigationView
-        android:id="@+id/navigation_view"
+        android:id="@+id/settings_bar_navigation_view"
         android:layout_width="280dp"
         android:layout_height="match_parent"
         android:layout_gravity="end">
