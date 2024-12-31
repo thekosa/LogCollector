@@ -6,7 +6,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import wat.inz.kolektorlogow.collectorLog.log.FirestoreLog;
 
-//this is mockup
+//this is stub
 public class FirestoreLogDAO {
     private FirebaseFirestore connection;
 
