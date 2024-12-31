@@ -2,6 +2,8 @@ package wat.inz.kolektorlogow.main;
 
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.util.Log;
@@ -26,12 +28,14 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.scottyab.rootbeer.RootBeer;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 import rikka.shizuku.Shizuku;
 import wat.inz.kolektorlogow.DAO.FirestoreLogDAO;
@@ -57,8 +61,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private EditText tagInput;
     private EditText pidInput;
     private EditText tidInput;
-    @SuppressLint("UseSwitchCompatOrMaterialCode")
-    private Switch adbSwitch;
+    private boolean ifADB = false;
     private CollectorLogsFilter collectorLogsFilter;
     private CollectorLogsSort collectorLogsSort;
     private Map<String, String> priorityMap;
@@ -71,6 +74,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private CheckBox checkBoxPriorityVisibility;
     private CheckBox checkBoxTagVisibility;
     private CheckBox checkBoxMassageVisibility;
+    private TextView permissionLevelTextView;
 
 
     @SuppressLint("MissingInflatedId")
@@ -81,6 +85,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         dbConnection = FirebaseFirestore.getInstance();
 
+        permissionLevelTextView = findViewById(R.id.permission_level_textview);
         settingsBar = findViewById(R.id.navigation_view);
         saveFiltersButton = settingsBar.findViewById(R.id.save_button);
         prioritySpinner = settingsBar.findViewById(R.id.priority_spinner);
@@ -96,7 +101,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         refreshListButton = findViewById(R.id.refreshList);
         refreshListButton.setEnabled(false);
         tableLayout = findViewById(R.id.tableLayout);
-        adbSwitch = findViewById(R.id.adb_switch);
         buttonSelectAllVisibility = findViewById(R.id.button_select_all_visibility);
         checkBoxDateTimeVisibility = findViewById(R.id.checkbox_datetime_visibility);
         checkBoxPidVisibility = findViewById(R.id.checkbox_pid_visibility);
@@ -130,6 +134,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         priorityMap.put("*", null);
 
         new FirestoreLogDAO(dbConnection).setOrdinalNumber(() -> refreshListButton.setEnabled(true));
+
+        onRefreshPermissionsButtonClick(null);
     }
 
     @Override
@@ -152,6 +158,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @SuppressLint("SetTextI18n")
+    public void onRefreshPermissionsButtonClick(View view) {
+        shizukuCheckPermission();
+        RootBeer rootBeer = new RootBeer(this);
+        if (rootBeer.isRooted()) {
+            permissionLevelTextView.setTextColor(Color.RED);
+            permissionLevelTextView.setText("root");
+            ifADB = false;
+        } else if (Shizuku.pingBinder() && Shizuku.getUid() == 2000) {
+            permissionLevelTextView.setTextColor(Color.GREEN);
+            permissionLevelTextView.setText("ADB");
+            ifADB = true;
+        } else {
+            permissionLevelTextView.setTextColor(Color.BLUE);
+            permissionLevelTextView.setText("Zwykły użytkownik");
+            ifADB = false;
+        }
     }
 
     @Override
@@ -187,27 +212,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Toast.makeText(this, "Saved", Toast.LENGTH_SHORT).show();
             drawerLayout.closeDrawer(settingsBar);
         }
-        //Switch ADB
-        if (v.getId() == adbSwitch.getId()) {
-            try {
-                if (adbSwitch.isChecked()) {
-                    if (Shizuku.checkSelfPermission() != PackageManager.PERMISSION_GRANTED) {
-                        Shizuku.requestPermission(0);
-                        Toast.makeText(this, "Shizuku permission is not ok", Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(this, "Shizuku permission is ok", Toast.LENGTH_SHORT).show();
-                    }
-                    if (Shizuku.pingBinder()) {
-                        Toast.makeText(this, "Shizuku is ready", Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(this, "Shizuku is not ready", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            } catch (IllegalStateException e) {
-                Toast.makeText(this, "Włącz Shizuku", Toast.LENGTH_SHORT).show();
-                adbSwitch.setChecked(false);
-            }
-        }
         //Przycisk zaznaczenia wszystkich kolumn
         if (v.getId() == buttonSelectAllVisibility.getId()) {
             checkBoxDateTimeVisibility.setChecked(true);
@@ -216,6 +220,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             checkBoxPriorityVisibility.setChecked(true);
             checkBoxTagVisibility.setChecked(true);
             checkBoxMassageVisibility.setChecked(true);
+        }
+    }
+
+    private void shizukuCheckPermission() {
+        try {
+            if (Shizuku.checkSelfPermission() != PackageManager.PERMISSION_GRANTED) {
+                Shizuku.requestPermission(0);
+            }
+        } catch (IllegalStateException e) {
+            Toast.makeText(this, "Włącz Shizuku", Toast.LENGTH_SHORT).show();
+            //return false;
         }
     }
 
@@ -277,19 +292,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void refreshLogList() {
         try {
             Process process;
-            if (adbSwitch.isChecked()) {
-                //todo: tu może dodać czyszczenie bufora logów logcat -c, aby pobierać i wyświetlać tylko nowe logi
+            if (ifADB) {
                 process = Shizuku.newProcess(logcatCommand.split(" "), null, null);
-                Shizuku.newProcess(new String[]{"logcat", "-c"}, null, null);
             } else {
-                //todo: tu może dodać czyszczenie bufora logów logcat -c, aby pobierać i wyświetlać tylko nowe logi
                 process = Runtime.getRuntime().exec(logcatCommand);
-                Runtime.getRuntime().exec("logcat -c");
             }
+
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             collectorLogs.destroyLogsList();
             collectorLogs.generateLogs(bufferedReader, dbConnection);
             bufferedReader.close();
+
+            Runtime.getRuntime().exec("logcat -c");
         } catch (IOException e) {
             String err = "Błąd polecenia logcat. ";
             Toast.makeText(this, err, Toast.LENGTH_SHORT).show();
