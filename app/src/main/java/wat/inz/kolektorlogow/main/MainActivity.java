@@ -2,7 +2,6 @@ package wat.inz.kolektorlogow.main;
 
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
-import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
@@ -15,7 +14,6 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Spinner;
-import android.widget.Switch;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -35,7 +33,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 
 import rikka.shizuku.Shizuku;
 import wat.inz.kolektorlogow.DAO.FirestoreLogDAO;
@@ -220,7 +217,6 @@ public class MainActivity extends AppCompatActivity {
             }
         } catch (IllegalStateException e) {
             Toast.makeText(this, "Włącz Shizuku", Toast.LENGTH_SHORT).show();
-            //return false;
         }
     }
 
