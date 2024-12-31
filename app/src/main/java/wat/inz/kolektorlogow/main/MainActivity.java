@@ -279,15 +279,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Process process;
             if (adbSwitch.isChecked()) {
                 process = Shizuku.newProcess(logcatCommand.split(" "), null, null);
-                Shizuku.newProcess(new String[]{"logcat", "-c"}, null, null);
             } else {
                 process = Runtime.getRuntime().exec(logcatCommand);
-                Runtime.getRuntime().exec("logcat -c");
             }
+
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             collectorLogs.destroyLogsList();
             collectorLogs.generateLogs(bufferedReader, dbConnection);
             bufferedReader.close();
+
+            Runtime.getRuntime().exec("logcat -c");
         } catch (IOException e) {
             String err = "Błąd polecenia logcat. ";
             Toast.makeText(this, err, Toast.LENGTH_SHORT).show();
