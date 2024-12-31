@@ -278,11 +278,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         try {
             Process process;
             if (adbSwitch.isChecked()) {
-                //todo: tu może dodać czyszczenie bufora logów logcat -c, aby pobierać i wyświetlać tylko nowe logi
                 process = Shizuku.newProcess(logcatCommand.split(" "), null, null);
                 Shizuku.newProcess(new String[]{"logcat", "-c"}, null, null);
             } else {
-                //todo: tu może dodać czyszczenie bufora logów logcat -c, aby pobierać i wyświetlać tylko nowe logi
                 process = Runtime.getRuntime().exec(logcatCommand);
                 Runtime.getRuntime().exec("logcat -c");
             }
