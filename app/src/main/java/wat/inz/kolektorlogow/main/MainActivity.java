@@ -2,6 +2,8 @@ package wat.inz.kolektorlogow.main;
 
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.util.Log;
@@ -26,12 +28,14 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.scottyab.rootbeer.RootBeer;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 import rikka.shizuku.Shizuku;
 import wat.inz.kolektorlogow.DAO.FirestoreLogDAO;
@@ -56,8 +60,7 @@ public class MainActivity extends AppCompatActivity {
     private EditText tagFilterEditText;
     private EditText pidFilterEditText;
     private EditText tidFilterEditText;
-    @SuppressLint("UseSwitchCompatOrMaterialCode")
-    private Switch adbSwitch;
+    private boolean ifADB = false;
     private CollectorLogsFilter collectorLogsFilter;
     private CollectorLogsSort collectorLogsSort;
     private Map<String, String> priorityMap;
@@ -69,6 +72,7 @@ public class MainActivity extends AppCompatActivity {
     private CheckBox priorityColumnVisibilityCheckBox;
     private CheckBox tagColumnVisibilityCheckBox;
     private CheckBox messageColumnVisibilityCheckBox;
+    private TextView permissionLevelTextView;
 
 
     @SuppressLint("MissingInflatedId")
@@ -77,6 +81,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
 
+        permissionLevelTextView = findViewById(R.id.permission_level_textview);
         settingsBarNavigationView = findViewById(R.id.settings_bar_navigation_view);
         priorityFilterSpinner = settingsBarNavigationView.findViewById(R.id.priority_filter_spinner);
         tagFilterEditText = settingsBarNavigationView.findViewById(R.id.tag_filter_edittext);
@@ -91,7 +96,6 @@ public class MainActivity extends AppCompatActivity {
         refreshLogListButton = findViewById(R.id.refresh_log_list_button);
         refreshLogListButton.setEnabled(false);
         logsListTableLayout = findViewById(R.id.logs_list_table_layout);
-        adbSwitch = findViewById(R.id.adb_switch);
         dateTimeColumnVisibilityCheckBox = findViewById(R.id.datetime_column_visibility_checkbox);
         pidColumnVisibilityCheckBox = findViewById(R.id.pid_column_visibility_checkbox);
         tidColumnVisibilityCheckBox = findViewById(R.id.tid_column_visibility_checkbox);
@@ -122,6 +126,8 @@ public class MainActivity extends AppCompatActivity {
 
         dbConnection = FirebaseFirestore.getInstance();
         new FirestoreLogDAO(dbConnection).setOrdinalNumber(() -> refreshLogListButton.setEnabled(true));
+
+        onRefreshPermissionsButtonClick(null);
     }
 
     @Override
@@ -144,6 +150,25 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @SuppressLint("SetTextI18n")
+    public void onRefreshPermissionsButtonClick(View view) {
+        shizukuCheckPermission();
+        RootBeer rootBeer = new RootBeer(this);
+        if (rootBeer.isRooted()) {
+            permissionLevelTextView.setTextColor(Color.RED);
+            permissionLevelTextView.setText("root");
+            ifADB = false;
+        } else if (Shizuku.pingBinder() && Shizuku.getUid() == 2000) {
+            permissionLevelTextView.setTextColor(Color.GREEN);
+            permissionLevelTextView.setText("ADB");
+            ifADB = true;
+        } else {
+            permissionLevelTextView.setTextColor(Color.BLUE);
+            permissionLevelTextView.setText("Zwykły użytkownik");
+            ifADB = false;
+        }
     }
 
     public void onRefreshLogsListButtonClick(View view) {
@@ -179,27 +204,6 @@ public class MainActivity extends AppCompatActivity {
         drawerLayout.closeDrawer(settingsBarNavigationView);
     }
 
-    public void onAdbSwitchClick(View view) {
-        try {
-            if (adbSwitch.isChecked()) {
-                if (Shizuku.checkSelfPermission() != PackageManager.PERMISSION_GRANTED) {
-                    Shizuku.requestPermission(0);
-                    Toast.makeText(this, "Shizuku permission is not ok", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(this, "Shizuku permission is ok", Toast.LENGTH_SHORT).show();
-                }
-                if (Shizuku.pingBinder()) {
-                    Toast.makeText(this, "Shizuku is ready", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(this, "Shizuku is not ready", Toast.LENGTH_SHORT).show();
-                }
-            }
-        } catch (IllegalStateException e) {
-            Toast.makeText(this, "Włącz Shizuku", Toast.LENGTH_SHORT).show();
-            adbSwitch.setChecked(false);
-        }
-    }
-
     public void onSelectAllColumnsVisibilityButtonClick(View view) {
         dateTimeColumnVisibilityCheckBox.setChecked(true);
         pidColumnVisibilityCheckBox.setChecked(true);
@@ -207,6 +211,17 @@ public class MainActivity extends AppCompatActivity {
         priorityColumnVisibilityCheckBox.setChecked(true);
         tagColumnVisibilityCheckBox.setChecked(true);
         messageColumnVisibilityCheckBox.setChecked(true);
+    }
+
+    private void shizukuCheckPermission() {
+        try {
+            if (Shizuku.checkSelfPermission() != PackageManager.PERMISSION_GRANTED) {
+                Shizuku.requestPermission(0);
+            }
+        } catch (IllegalStateException e) {
+            Toast.makeText(this, "Włącz Shizuku", Toast.LENGTH_SHORT).show();
+            //return false;
+        }
     }
 
     private void buildLogsListTableLayout() {
@@ -267,7 +282,7 @@ public class MainActivity extends AppCompatActivity {
     private void refreshLogList() {
         try {
             Process process;
-            if (adbSwitch.isChecked()) {
+            if (ifADB) {
                 process = Shizuku.newProcess(logcatCommand.split(" "), null, null);
             } else {
                 process = Runtime.getRuntime().exec(logcatCommand);
@@ -286,5 +301,4 @@ public class MainActivity extends AppCompatActivity {
             System.err.println(err + e);
         }
     }
-
 }

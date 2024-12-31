@@ -11,19 +11,43 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <Switch
-            android:id="@+id/adb_switch"
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:onClick="onAdbSwitchClick"
-            android:text="ADB"
-            tools:ignore="UseSwitchCompatOrMaterialXml" />
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:text="Poziom uprawnień: "
+                android:textSize="20sp"
+                tools:ignore="HardcodedText" />
+
+            <TextView
+                android:id="@+id/permission_level_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+        </RelativeLayout>
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:onClick="onRefreshPermissionsButtonClick"
+            android:text="odśwież poziom uprawnień"
+            tools:ignore="HardcodedText" />
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:layout_margin="10dp">
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp">
 
             <Button
                 android:id="@+id/refresh_log_list_button"
@@ -48,7 +72,8 @@
                 android:contentDescription="Opcje wyświetlania"
                 android:onClick="onSettingsButtonClick"
                 android:scaleType="centerInside"
-                android:src="@drawable/ic_menu" />
+                android:src="@drawable/ic_menu"
+                tools:ignore="HardcodedText" />
 
         </RelativeLayout>
 
