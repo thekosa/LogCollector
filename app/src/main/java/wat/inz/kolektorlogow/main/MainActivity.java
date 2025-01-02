@@ -124,7 +124,13 @@ public class MainActivity extends AppCompatActivity {
         dbConnection = FirebaseFirestore.getInstance();
         new FirestoreLogDAO(dbConnection).setOrdinalNumber(() -> refreshLogListButton.setEnabled(true));
 
-        onRefreshPermissionsButtonClick(null);
+        refreshPermissions();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refreshPermissions();
     }
 
     @Override
@@ -150,7 +156,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @SuppressLint("SetTextI18n")
-    public void onRefreshPermissionsButtonClick(View view) {
+    public void refreshPermissions() {
         shizukuCheckPermission();
         RootBeer rootBeer = new RootBeer(this);
         if (rootBeer.isRooted()) {
@@ -169,6 +175,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onRefreshLogsListButtonClick(View view) {
+        refreshPermissions();
         refreshLogList();
         collectorLogs.sortOutLogs(collectorLogsSort);
         collectorLogsFiltered.setLogsList(collectorLogs.filterOutLogs(collectorLogsFilter));
