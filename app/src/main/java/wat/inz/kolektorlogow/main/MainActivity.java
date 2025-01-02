@@ -188,7 +188,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onSettingsButtonClick(View view) {
-        Toast.makeText(this, "Filter", Toast.LENGTH_SHORT).show();
         drawerLayout.openDrawer(GravityCompat.END);
     }
 
