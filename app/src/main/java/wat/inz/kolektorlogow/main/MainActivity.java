@@ -155,25 +155,6 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    @SuppressLint("SetTextI18n")
-    public void refreshPermissions() {
-        shizukuCheckPermission();
-        RootBeer rootBeer = new RootBeer(this);
-        if (rootBeer.isRooted()) {
-            permissionLevelTextView.setTextColor(Color.RED);
-            permissionLevelTextView.setText("root");
-            ifADB = false;
-        } else if (Shizuku.pingBinder() && Shizuku.getUid() == 2000) {
-            permissionLevelTextView.setTextColor(Color.GREEN);
-            permissionLevelTextView.setText("ADB");
-            ifADB = true;
-        } else {
-            permissionLevelTextView.setTextColor(Color.BLUE);
-            permissionLevelTextView.setText("Zwykły użytkownik");
-            ifADB = false;
-        }
-    }
-
     public void onRefreshLogsListButtonClick(View view) {
         refreshPermissions();
         refreshLogList();
@@ -214,6 +195,25 @@ public class MainActivity extends AppCompatActivity {
         priorityColumnVisibilityCheckBox.setChecked(true);
         tagColumnVisibilityCheckBox.setChecked(true);
         messageColumnVisibilityCheckBox.setChecked(true);
+    }
+
+    @SuppressLint("SetTextI18n")
+    private void refreshPermissions() {
+        shizukuCheckPermission();
+        RootBeer rootBeer = new RootBeer(this);
+        if (rootBeer.isRooted()) {
+            permissionLevelTextView.setTextColor(Color.RED);
+            permissionLevelTextView.setText("root");
+            ifADB = false;
+        } else if (Shizuku.pingBinder() && Shizuku.getUid() == 2000) {
+            permissionLevelTextView.setTextColor(Color.GREEN);
+            permissionLevelTextView.setText("ADB");
+            ifADB = true;
+        } else {
+            permissionLevelTextView.setTextColor(Color.BLUE);
+            permissionLevelTextView.setText("Zwykły użytkownik");
+            ifADB = false;
+        }
     }
 
     private void shizukuCheckPermission() {
