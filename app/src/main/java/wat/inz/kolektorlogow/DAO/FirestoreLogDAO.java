@@ -17,9 +17,6 @@ public class FirestoreLogDAO {
     }
 
     public void saveLog(FirestoreLog log) {
-        //to jest device id, tu można wpisać takie id np, unikalny dla każdego użytkownika na danym urządzeniu
-        //String androidId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
-
         connection
                 .collection(Build.MANUFACTURER + " " + Build.MODEL)
                 .add(log)
