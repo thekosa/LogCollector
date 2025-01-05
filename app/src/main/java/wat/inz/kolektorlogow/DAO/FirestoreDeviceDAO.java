@@ -1,11 +1,10 @@
 package wat.inz.kolektorlogow.DAO;
 
-import android.util.Log;
-
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import wat.inz.kolektorlogow.meta.FirestoreDevice;
 
+//this is stub
 public class FirestoreDeviceDAO {
     private final FirebaseFirestore connection;
     private final FirestoreDevice device;
@@ -17,22 +16,8 @@ public class FirestoreDeviceDAO {
     }
 
     public void ifDeviceExists(Runnable callback) {
-        connection
-                .collection(registryName)
-                .whereEqualTo("identifier", device.getIdentifier())
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    if (queryDocumentSnapshots.isEmpty()) {
-                        callback.run();
-                    }
-                });
     }
 
     public void registerDevice() {
-        connection
-                .collection(registryName)
-                .add(device)
-                .addOnSuccessListener(a -> Log.d("OgnistyMagazyn", "Urządzenie o nazwie " + device.getName() + " zostało zarejestrowane w bazie"))
-                .addOnFailureListener(a -> Log.e("OgnistyMagazyn", "Urządzenie o nazwie " + device.getName() + " NIE zostało zarejestrowane w bazie"));
     }
 }
