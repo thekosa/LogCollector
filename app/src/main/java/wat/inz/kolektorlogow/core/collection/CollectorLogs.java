@@ -1,4 +1,4 @@
-package wat.inz.kolektorlogow.collectorLog.collection;
+package wat.inz.kolektorlogow.core.collection;
 
 import android.util.Log;
 
@@ -11,10 +11,10 @@ import java.util.List;
 
 import lombok.Data;
 import wat.inz.kolektorlogow.DAO.FirestoreLogDAO;
-import wat.inz.kolektorlogow.collectorLog.log.CollectorLog;
-import wat.inz.kolektorlogow.collectorLog.log.FirestoreLog;
-import wat.inz.kolektorlogow.collectorLog.modifiers.CollectorLogsFilter;
-import wat.inz.kolektorlogow.collectorLog.modifiers.CollectorLogsSort;
+import wat.inz.kolektorlogow.core.log.CollectorLog;
+import wat.inz.kolektorlogow.core.log.FirestoreLog;
+import wat.inz.kolektorlogow.core.modifiers.CollectorLogsFilter;
+import wat.inz.kolektorlogow.core.modifiers.CollectorLogsSort;
 
 public @Data class CollectorLogs {
     private List<CollectorLog> logsList;

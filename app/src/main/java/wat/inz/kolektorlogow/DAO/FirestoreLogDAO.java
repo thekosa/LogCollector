@@ -7,7 +7,7 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
-import wat.inz.kolektorlogow.collectorLog.log.FirestoreLog;
+import wat.inz.kolektorlogow.core.log.FirestoreLog;
 
 public class FirestoreLogDAO {
     private final FirebaseFirestore connection;

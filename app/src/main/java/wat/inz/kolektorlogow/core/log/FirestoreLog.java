@@ -1,4 +1,4 @@
-package wat.inz.kolektorlogow.collectorLog.log;
+package wat.inz.kolektorlogow.core.log;
 
 import lombok.Getter;
 import lombok.Setter;

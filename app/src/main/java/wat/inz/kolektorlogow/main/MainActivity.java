@@ -38,10 +38,10 @@ import rikka.shizuku.Shizuku;
 import wat.inz.kolektorlogow.DAO.FirestoreDeviceDAO;
 import wat.inz.kolektorlogow.DAO.FirestoreLogDAO;
 import wat.inz.kolektorlogow.R;
-import wat.inz.kolektorlogow.collectorLog.collection.CollectorLogs;
-import wat.inz.kolektorlogow.collectorLog.log.CollectorLog;
-import wat.inz.kolektorlogow.collectorLog.modifiers.CollectorLogsFilter;
-import wat.inz.kolektorlogow.collectorLog.modifiers.CollectorLogsSort;
+import wat.inz.kolektorlogow.core.collection.CollectorLogs;
+import wat.inz.kolektorlogow.core.log.CollectorLog;
+import wat.inz.kolektorlogow.core.modifiers.CollectorLogsFilter;
+import wat.inz.kolektorlogow.core.modifiers.CollectorLogsSort;
 import wat.inz.kolektorlogow.meta.FirestoreDevice;
 
 
