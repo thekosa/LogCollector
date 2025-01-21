@@ -1,0 +1,10 @@
+[
+    {
+        "merged": "wat.inz.kolektorlogow.app-mergeDebugResources-47:/layout/main_activity.xml",
+        "source": "wat.inz.kolektorlogow.app-main-50:/layout/main_activity.xml"
+    },
+    {
+        "merged": "wat.inz.kolektorlogow.app-mergeDebugResources-47:/layout/drawer_view.xml",
+        "source": "wat.inz.kolektorlogow.app-main-50:/layout/drawer_view.xml"
+    }
+]

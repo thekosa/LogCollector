@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "170108012560",
+    "project_id": "logcollector-d2acc",
+    "storage_bucket": "logcollector-d2acc.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:170108012560:android:52b2d07fc568622f8b6295",
+        "android_client_info": {
+          "package_name": "wat.inz.kolektorlogow"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAguLc0V0WkVyxmPqMWNI8a_G9MAgT6B9w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
