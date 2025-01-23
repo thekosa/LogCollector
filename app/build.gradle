@@ -40,10 +40,8 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.2.0'
     implementation 'androidx.navigation:navigation-fragment:2.8.4'
     implementation 'androidx.navigation:navigation-ui:2.8.4'
-    testImplementation 'junit:junit:4.13.2'
-    testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
+    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
     compileOnly 'org.projectlombok:lombok:1.18.34'
     annotationProcessor 'org.projectlombok:lombok:1.18.34'
     implementation 'dev.rikka.shizuku:api:13.0.0'
@@ -52,4 +50,14 @@ dependencies {
     implementation platform('com.google.firebase:firebase-bom:33.6.0')
     implementation 'com.google.firebase:firebase-firestore:25.1.1'
     implementation 'com.scottyab:rootbeer-lib:0.1.1'
+    // Testy jednostkowe
+    testImplementation 'junit:junit:4.13.2'
+
+    // Jeśli używasz Mockito do mockowania:
+
+    testImplementation 'org.mockito:mockito-core:5.15.2'
+
+    // Opcjonalnie, jeśli masz zależności z Androida w testach jednostkowych:
+    testImplementation 'androidx.test:core:1.6.1'
+    testImplementation 'androidx.test.ext:junit:1.2.1'
 }
