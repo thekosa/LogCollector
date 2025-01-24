@@ -47,7 +47,6 @@ import wat.inz.kolektorlogow.meta.FirestoreDevice;
 
 
 public class MainActivity extends AppCompatActivity {
-    private boolean noInternet = true;
     private FirebaseFirestore dbConnection;
     private Button refreshLogListButton;
     private TableLayout logsListTableLayout;
@@ -126,24 +125,44 @@ public class MainActivity extends AppCompatActivity {
         priorityMap.put("*", null);
 
         dbConnection = FirebaseFirestore.getInstance();
+    }
+
+    private static void doNothing(int i) {
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
         TextView offlineTextView = findViewById(R.id.offline_textview);
 
-        FirestoreDeviceDAO deviceDAO = new FirestoreDeviceDAO(dbConnection, new FirestoreDevice(this));
-        int deviceExist = deviceDAO.ifDeviceExist();
-        if (deviceExist == 0) {
-            deviceDAO.registerDevice();
-        }
-
-        long maxOrdinalNumber = new FirestoreLogDAO(dbConnection).findMaxOrdinalNumber();
-        if (maxOrdinalNumber == -1 || deviceExist == -1) {
-            Toast.makeText(this, "Błąd połączenia z bazą danych, sprawdź połączenie z internetem", Toast.LENGTH_LONG).show();
-            noInternet = true;
+        if (!isNetworkAvailable()) {
+            Toast.makeText(this, "Brak połączenia z internetem", Toast.LENGTH_LONG).show();
             offlineTextView.setVisibility(View.VISIBLE);
-        } else {
-            FirestoreLog.setStaticOrdinalNumber(maxOrdinalNumber);
+            refreshLogListButton.setText("odśwież bez zapisu w bazie");
+            refreshLogListButton.setEnabled(true);
+            return;
         }
 
-        refreshLogListButton.setEnabled(true);
+        FirestoreDeviceDAO deviceDAO = new FirestoreDeviceDAO(dbConnection, new FirestoreDevice(this));
+        deviceDAO.ifDeviceExist(result -> {
+            if (result == 0) {
+                deviceDAO.registerDevice(this::doNothing);
+            } else if (result == -1) {
+                Toast.makeText(this, "Sprawdź połączenie z internetem", Toast.LENGTH_LONG).show();
+            }
+        });
+
+
+        new FirestoreLogDAO(dbConnection).findMaxOrdinalNumber(result -> {
+            if (result == -1) {
+                Toast.makeText(this, "Sprawdź połączenie z internetem", Toast.LENGTH_LONG).show();
+            } else {
+                FirestoreLog.setStaticOrdinalNumber(result);
+                refreshLogListButton.setEnabled(true);
+            }
+        });
+
         refreshPermissions();
     }
 
@@ -215,6 +234,18 @@ public class MainActivity extends AppCompatActivity {
         priorityColumnVisibilityCheckBox.setChecked(true);
         tagColumnVisibilityCheckBox.setChecked(true);
         messageColumnVisibilityCheckBox.setChecked(true);
+    }
+
+    private boolean isNetworkAvailable() {
+        Runtime runtime = Runtime.getRuntime();
+        try {
+            Process process = runtime.exec("/system/bin/ping -c 1 8.8.8.8");
+            int exitValue = process.waitFor();
+            return (exitValue == 0);
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     @SuppressLint("SetTextI18n")
@@ -312,7 +343,7 @@ public class MainActivity extends AppCompatActivity {
 
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             collectorLogs.destroyLogsList();
-            collectorLogs.generateLogs(bufferedReader, dbConnection, noInternet);
+            collectorLogs.generateLogs(bufferedReader, dbConnection);
             bufferedReader.close();
 
             Runtime.getRuntime().exec("logcat -c");
@@ -322,5 +353,8 @@ public class MainActivity extends AppCompatActivity {
             Log.e(this.getPackageName(), err, e);
             System.err.println(err + e);
         }
+    }
+
+    private void doNothing(Object object) {
     }
 }
