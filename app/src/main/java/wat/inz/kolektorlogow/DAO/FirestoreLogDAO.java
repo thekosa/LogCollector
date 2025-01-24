@@ -23,22 +23,16 @@ public class FirestoreLogDAO {
         this.collectionReference = connection.collection(deviceName);
     }
 
-    public FirestoreLogDAO() {
-        this.collectionReference = null;
-    }
-
     public void saveLog(FirestoreLog log) {
-        if (collectionReference != null) {
             collectionReference
                     .add(log)
                     .addOnSuccessListener(a -> Log.d("OgnistyMagazyn", "Log o tagu " + log.getTag() + " zapisany"))
                     .addOnFailureListener(a -> Log.e("OgnistyMagazyn", "Log o tagu " + log.getTag() + " nie zapisany"));
-        }
+
     }
 
     public long findMaxOrdinalNumber() {
         final long[] maxOrdinalNumber = {-1};
-        if (collectionReference != null) {
             CountDownLatch latch = new CountDownLatch(1);
             collectionReference
                     .orderBy("ordinalNumber", Query.Direction.DESCENDING)
@@ -63,7 +57,6 @@ public class FirestoreLogDAO {
                 }
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
-            }
         }
         return maxOrdinalNumber[0];
     }

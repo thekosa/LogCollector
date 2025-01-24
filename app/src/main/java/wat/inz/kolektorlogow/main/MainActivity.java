@@ -126,7 +126,6 @@ public class MainActivity extends AppCompatActivity {
         priorityMap.put("*", null);
 
         dbConnection = FirebaseFirestore.getInstance();
-        Log.d("OgnistyMagazyn", "Instancja: " + dbConnection);
         TextView offlineTextView = findViewById(R.id.offline_textview);
 
         FirestoreDeviceDAO deviceDAO = new FirestoreDeviceDAO(dbConnection, new FirestoreDevice(this));
