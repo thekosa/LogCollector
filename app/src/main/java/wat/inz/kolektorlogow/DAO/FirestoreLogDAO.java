@@ -1,48 +1,74 @@
+
 package wat.inz.kolektorlogow.DAO;
 
 import android.os.Build;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
+
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
 import wat.inz.kolektorlogow.core.log.FirestoreLog;
 
 public class FirestoreLogDAO {
-    private final FirebaseFirestore connection;
+    private final CollectionReference collectionReference;
+    private final String deviceName = Build.MANUFACTURER + " " + Build.MODEL;
 
     public FirestoreLogDAO(FirebaseFirestore connection) {
-        this.connection = connection;
+        this.collectionReference = connection.collection(deviceName);
+    }
+
+    public FirestoreLogDAO() {
+        this.collectionReference = null;
     }
 
     public void saveLog(FirestoreLog log) {
-        connection
-                .collection(Build.MANUFACTURER + " " + Build.MODEL)
-                .add(log)
-                .addOnSuccessListener(a -> Log.d("OgnistyMagazyn", "Log o tagu " + log.getTag() + " zapisany"))
-                .addOnFailureListener(a -> Log.e("OgnistyMagazyn", "Log o tagu " + log.getTag() + " nie zapisany"));
+        if (collectionReference != null) {
+            collectionReference
+                    .add(log)
+                    .addOnSuccessListener(a -> Log.d("OgnistyMagazyn", "Log o tagu " + log.getTag() + " zapisany"))
+                    .addOnFailureListener(a -> Log.e("OgnistyMagazyn", "Log o tagu " + log.getTag() + " nie zapisany"));
+        }
     }
 
-    public void setOrdinalNumber(Runnable callback) {
-        String deviceName = Build.MANUFACTURER + " " + Build.MODEL;
-
-        CollectionReference collectionRef = connection.collection(deviceName);
-        Query query = collectionRef
-                .orderBy("ordinalNumber", Query.Direction.DESCENDING)
-                .limit(1);
-
-        query.get().addOnSuccessListener(queryDocumentSnapshots -> {
-            if (queryDocumentSnapshots.isEmpty()) {
-                FirestoreLog.setStaticOrdinalNumber(0);
-            } else {
-                Object maxOrdinalNnumber = queryDocumentSnapshots.getDocuments().get(0).get("ordinalNumber");
-                FirestoreLog.setStaticOrdinalNumber(maxOrdinalNnumber == null ? 0 : (long) maxOrdinalNnumber);
+    public long findMaxOrdinalNumber() {
+        final long[] maxOrdinalNumber = {-1};
+        if (collectionReference != null) {
+            CountDownLatch latch = new CountDownLatch(1);
+            collectionReference
+                    .orderBy("ordinalNumber", Query.Direction.DESCENDING)
+                    .limit(1)
+                    .get()
+                    .addOnSuccessListener(queryDocumentSnapshots -> {
+                        Object maxNumber = queryDocumentSnapshots.getDocuments().get(0).get("ordinalNumber");
+                        if (maxNumber != null) {
+                            maxOrdinalNumber[0] = (long) maxNumber;
+                        } else {
+                            maxOrdinalNumber[0] = 0;
+                        }
+                        latch.countDown();
+                    }).addOnFailureListener(e -> {
+                        Log.e("OgnistyMagazyn", "Błąd podczas pobierania maksymalnej wartości liczby porządkowej z kolekcji" + deviceName, e);
+                        maxOrdinalNumber[0] = -1;
+                        latch.countDown();
+                    });
+            try {
+                if (wait(latch, 30)) {
+                    maxOrdinalNumber[0] = -1;
+                }
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             }
-            callback.run();
-        }).addOnFailureListener(e -> {
-            Log.e("OgnistyMagazyn", "Błąd podczas pobierania maksymalnej wartości liczby porządkowej z kolekcji" + deviceName, e);
-            callback.run();
-        });
+        }
+        return maxOrdinalNumber[0];
+    }
+
+    private boolean wait(CountDownLatch latch, int seconds) throws InterruptedException {
+        return !latch.await(seconds, TimeUnit.SECONDS);
     }
 }

@@ -40,12 +40,14 @@ import wat.inz.kolektorlogow.DAO.FirestoreLogDAO;
 import wat.inz.kolektorlogow.R;
 import wat.inz.kolektorlogow.core.collection.CollectorLogs;
 import wat.inz.kolektorlogow.core.log.CollectorLog;
+import wat.inz.kolektorlogow.core.log.FirestoreLog;
 import wat.inz.kolektorlogow.core.modifiers.CollectorLogsFilter;
 import wat.inz.kolektorlogow.core.modifiers.CollectorLogsSort;
 import wat.inz.kolektorlogow.meta.FirestoreDevice;
 
 
 public class MainActivity extends AppCompatActivity {
+    private boolean noInternet = true;
     private FirebaseFirestore dbConnection;
     private Button refreshLogListButton;
     private TableLayout logsListTableLayout;
@@ -124,10 +126,25 @@ public class MainActivity extends AppCompatActivity {
         priorityMap.put("*", null);
 
         dbConnection = FirebaseFirestore.getInstance();
-        FirestoreDeviceDAO deviceDAO = new FirestoreDeviceDAO(dbConnection, new FirestoreDevice(this));
-        deviceDAO.ifDeviceExists(() -> deviceDAO.registerDevice());
-        new FirestoreLogDAO(dbConnection).setOrdinalNumber(() -> refreshLogListButton.setEnabled(true));
+        Log.d("OgnistyMagazyn", "Instancja: " + dbConnection);
+        TextView offlineTextView = findViewById(R.id.offline_textview);
 
+        FirestoreDeviceDAO deviceDAO = new FirestoreDeviceDAO(dbConnection, new FirestoreDevice(this));
+        int deviceExist = deviceDAO.ifDeviceExist();
+        if (deviceExist == 0) {
+            deviceDAO.registerDevice();
+        }
+
+        long maxOrdinalNumber = new FirestoreLogDAO(dbConnection).findMaxOrdinalNumber();
+        if (maxOrdinalNumber == -1 || deviceExist == -1) {
+            Toast.makeText(this, "Błąd połączenia z bazą danych, sprawdź połączenie z internetem", Toast.LENGTH_LONG).show();
+            noInternet = true;
+            offlineTextView.setVisibility(View.VISIBLE);
+        } else {
+            FirestoreLog.setStaticOrdinalNumber(maxOrdinalNumber);
+        }
+
+        refreshLogListButton.setEnabled(true);
         refreshPermissions();
     }
 
@@ -296,7 +313,7 @@ public class MainActivity extends AppCompatActivity {
 
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             collectorLogs.destroyLogsList();
-            collectorLogs.generateLogs(bufferedReader, dbConnection);
+            collectorLogs.generateLogs(bufferedReader, dbConnection, noInternet);
             bufferedReader.close();
 
             Runtime.getRuntime().exec("logcat -c");

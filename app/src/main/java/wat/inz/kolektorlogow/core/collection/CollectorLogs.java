@@ -23,7 +23,7 @@ public @Data class CollectorLogs {
         logsList = new ArrayList<>();
     }
 
-    public void generateLogs(BufferedReader stream, FirebaseFirestore dbConnection) {
+    public void generateLogs(BufferedReader stream, FirebaseFirestore dbConnection, boolean noInternet) {
         try {
             int logCount = 0;
             FirestoreLogDAO firestoreLogDAO = new FirestoreLogDAO(dbConnection);
