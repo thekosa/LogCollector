@@ -2,8 +2,6 @@ package wat.inz.kolektorlogow.DAO;
 
 import android.util.Log;
 
-import androidx.annotation.Nullable;
-
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -27,7 +25,6 @@ public class FirestoreDeviceDAO {
      * <br>
      * otherwise return -1 - error with connection
      */
-
     public void ifDeviceExist(Consumer<Integer> callback) {
         collectionReference
                 .whereEqualTo("identifier", device.getIdentifier())
