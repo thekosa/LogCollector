@@ -6,9 +6,10 @@ import android.os.Build;
 import android.provider.Settings;
 
 import lombok.Getter;
+import lombok.Setter;
 
 
-public @Getter class FirestoreDevice {
+public @Getter @Setter class FirestoreDevice {
     private String name;
     private String identifier;
 

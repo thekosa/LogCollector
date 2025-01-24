@@ -1,17 +1,10 @@
 package wat.inz.kolektorlogow.core.collection;
 
-import static org.junit.Assert.assertEquals;
-
-import android.webkit.RoboCookieManager;
-
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -21,8 +14,6 @@ import wat.inz.kolektorlogow.core.log.CollectorLog;
 import wat.inz.kolektorlogow.core.modifiers.CollectorLogsFilter;
 import wat.inz.kolektorlogow.core.modifiers.CollectorLogsSort;
 
-@RunWith(RobolectricTestRunner.class)
-@Config(sdk = 33, shadows = {RoboCookieManager.class})
 public class CollectorLogsTest {
     private CollectorLogs collectorLogs = new CollectorLogs();
     private BufferedReader mockbufferedReader;
