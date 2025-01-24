@@ -2,37 +2,55 @@ package wat.inz.kolektorlogow.DAO;
 
 import android.util.Log;
 
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.function.Consumer;
 
 import wat.inz.kolektorlogow.meta.FirestoreDevice;
 
 public class FirestoreDeviceDAO {
-    private final FirebaseFirestore connection;
     private final FirestoreDevice device;
-    private final String registryName = "devices-registry";
+    private final CollectionReference collectionReference;
 
     public FirestoreDeviceDAO(FirebaseFirestore connection, FirestoreDevice device) {
-        this.connection = connection;
         this.device = device;
+        this.collectionReference = connection.collection("devices-registry");
     }
 
-    public void ifDeviceExists(Runnable callback) {
-        connection
-                .collection(registryName)
+    /**
+     * if device exists return 1
+     * <br>
+     * if device does NOT exist return 0
+     * <br>
+     * otherwise return -1 - error with connection
+     */
+    public void ifDeviceExist(Consumer<Integer> callback) {
+        collectionReference
                 .whereEqualTo("identifier", device.getIdentifier())
                 .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    if (queryDocumentSnapshots.isEmpty()) {
-                        callback.run();
-                    }
+                .addOnSuccessListener(queryDocumentSnapshots -> callback.accept(!queryDocumentSnapshots.isEmpty() ? 1 : 0))
+                .addOnFailureListener(e -> callback.accept(-1));
+    }
+
+    public void registerDevice(Consumer<Boolean> callback) {
+        collectionReference
+                .add(device)
+                .addOnSuccessListener(a -> {
+                    Log.d("OgnistyMagazyn", "Urządzenie o nazwie " + device.getName() + " zostało zarejestrowane w bazie");
+                    callback.accept(true);
+
+                })
+                .addOnFailureListener(a -> {
+                    Log.e("OgnistyMagazyn", "Urządzenie o nazwie " + device.getName() + " NIE zostało zarejestrowane w bazie");
+                    callback.accept(false);
                 });
     }
 
-    public void registerDevice() {
-        connection
-                .collection(registryName)
-                .add(device)
-                .addOnSuccessListener(a -> Log.d("OgnistyMagazyn", "Urządzenie o nazwie " + device.getName() + " zostało zarejestrowane w bazie"))
-                .addOnFailureListener(a -> Log.e("OgnistyMagazyn", "Urządzenie o nazwie " + device.getName() + " NIE zostało zarejestrowane w bazie"));
+    public void findAllDevices(Consumer<Integer> callback) {
+        collectionReference
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> callback.accept(queryDocumentSnapshots.size()))
+                .addOnFailureListener(e -> callback.accept(-1));
     }
 }

@@ -126,9 +126,43 @@ public class MainActivity extends AppCompatActivity {
         priorityMap.put("*", null);
 
         dbConnection = FirebaseFirestore.getInstance();
+    }
+
+    private static void doNothing(int i) {
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        TextView offlineTextView = findViewById(R.id.offline_textview);
+
+        if (!isNetworkAvailable()) {
+            Toast.makeText(this, "Brak połączenia z internetem", Toast.LENGTH_LONG).show();
+            offlineTextView.setVisibility(View.VISIBLE);
+            refreshLogListButton.setText("odśwież bez zapisu w bazie");
+            refreshLogListButton.setEnabled(true);
+            return;
+        }
+
         FirestoreDeviceDAO deviceDAO = new FirestoreDeviceDAO(dbConnection, new FirestoreDevice(this));
-        deviceDAO.ifDeviceExists(() -> deviceDAO.registerDevice());
-        new FirestoreLogDAO(dbConnection).setOrdinalNumber(() -> refreshLogListButton.setEnabled(true));
+        deviceDAO.ifDeviceExist(result -> {
+            if (result == 0) {
+                deviceDAO.registerDevice(this::doNothing);
+            } else if (result == -1) {
+                Toast.makeText(this, "Sprawdź połączenie z internetem", Toast.LENGTH_LONG).show();
+            }
+        });
+
+
+        new FirestoreLogDAO(dbConnection).findMaxOrdinalNumber(result -> {
+            if (result == -1) {
+                Toast.makeText(this, "Sprawdź połączenie z internetem", Toast.LENGTH_LONG).show();
+            } else {
+                FirestoreLog.setStaticOrdinalNumber(result);
+                refreshLogListButton.setEnabled(true);
+            }
+        });
 
         refreshPermissions();
     }
@@ -201,6 +235,18 @@ public class MainActivity extends AppCompatActivity {
         priorityColumnVisibilityCheckBox.setChecked(true);
         tagColumnVisibilityCheckBox.setChecked(true);
         messageColumnVisibilityCheckBox.setChecked(true);
+    }
+
+    private boolean isNetworkAvailable() {
+        Runtime runtime = Runtime.getRuntime();
+        try {
+            Process process = runtime.exec("/system/bin/ping -c 1 8.8.8.8");
+            int exitValue = process.waitFor();
+            return (exitValue == 0);
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     @SuppressLint("SetTextI18n")
@@ -322,5 +368,8 @@ public class MainActivity extends AppCompatActivity {
             Log.e(this.getPackageName(), err, e);
             System.err.println(err + e);
         }
+    }
+
+    private void doNothing(Object object) {
     }
 }
