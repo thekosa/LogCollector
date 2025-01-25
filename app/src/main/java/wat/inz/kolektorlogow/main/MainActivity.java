@@ -237,6 +237,8 @@ public class MainActivity extends AppCompatActivity {
         messageColumnVisibilityCheckBox.setChecked(true);
     }
 
+    //source: best answer added by Alex Mamo
+    //https://stackoverflow.com/questions/52279144/how-to-verify-if-user-has-network-access-and-show-a-pop-up-alert-when-there-isn
     private boolean isNetworkAvailable() {
         Runtime runtime = Runtime.getRuntime();
         try {

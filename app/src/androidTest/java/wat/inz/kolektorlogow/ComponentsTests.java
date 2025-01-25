@@ -37,7 +37,7 @@ public class ComponentsTests {
             MainActivity mainActivity = new MainActivity();
             BufferedReader bufferedReader = mainActivity.refreshLogList("logcat -d");
             CollectorLogs collectorLogs = new CollectorLogs();
-            collectorLogs.generateLogs(bufferedReader, null, false);
+            collectorLogs.generateLogs(bufferedReader, null);
             assertFalse(collectorLogs.getLogsList().isEmpty());
         });
     }
@@ -65,11 +65,5 @@ public class ComponentsTests {
         logsList.add(new CollectorLog("2025-01-22 15:53:09.515 1219 1811 F fatal:fatal log"));
         collectorLogs.setLogsList(logsList);
         assertEquals(1, collectorLogs.filterOutLogs(collectorLogsFilter).size());
-    }
-
-    @Test
-    public void registerDevice() {
-        FirestoreDeviceDAOTest firestoreDeviceDAOTest = new FirestoreDeviceDAOTest();
-        //firestoreDeviceDAOTest.registerDevice();
     }
 }

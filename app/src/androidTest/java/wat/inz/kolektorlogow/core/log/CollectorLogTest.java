@@ -39,9 +39,7 @@ public class CollectorLogTest {
 
     @Test
     public void getDateTime() {
-        String dateTimePattern = "\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\.\\d{3}";
-        Pattern pattern = Pattern.compile(dateTimePattern);
-        assertTrue(pattern.matcher(collectorLog.getDateTime().toString()).matches());
+        assertEquals("2025-01-22 15:53:09.515", collectorLog.getDateTime().toString());
     }
 
     @Test

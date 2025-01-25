@@ -22,6 +22,7 @@ public class CollectorLogsTest {
     private CollectorLogsSort mockcollectorLogsSort = Mockito.mock(CollectorLogsSort.class);
     private CollectorLog mockcollectorLog = Mockito.mock(CollectorLog.class);
 
+//ten test nie działa, do wywalenia
 
     @Before
     public void setUp() throws Exception {

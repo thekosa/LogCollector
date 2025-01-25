@@ -14,10 +14,16 @@ import wat.inz.kolektorlogow.core.log.FirestoreLog;
 
 public class FirestoreLogDAO {
     private final CollectionReference collectionReference;
-    private final String deviceName = Build.MANUFACTURER + " " + Build.MODEL;
+    private final String deviceName;
 
     public FirestoreLogDAO(FirebaseFirestore connection) {
+        this.deviceName = Build.MANUFACTURER + " " + Build.MODEL;
         this.collectionReference = connection.collection(deviceName);
+    }
+
+    public FirestoreLogDAO(FirebaseFirestore connection, String deviceName) {
+        this.deviceName = deviceName;
+        this.collectionReference = connection.collection(this.deviceName);
     }
 
     public void saveLog(FirestoreLog log) {
@@ -27,9 +33,7 @@ public class FirestoreLogDAO {
                 .addOnFailureListener(a -> Log.e("OgnistyMagazyn", "Log o tagu " + log.getTag() + " nie zapisany"));
     }
 
-    public long findMaxOrdinalNumber(Consumer<Long> callback) {
-        final long[] maxOrdinalNumber = {5};
-
+    public void findMaxOrdinalNumber(Consumer<Long> callback) {
         collectionReference
                 .orderBy("ordinalNumber", Query.Direction.DESCENDING)
                 .limit(1)
@@ -45,7 +49,5 @@ public class FirestoreLogDAO {
                     Log.e("OgnistyMagazyn", "Błąd podczas pobierania maksymalnej wartości liczby porządkowej z kolekcji" + deviceName, e);
                     callback.accept((long) -1);
                 });
-
-        return maxOrdinalNumber[0];
     }
 }

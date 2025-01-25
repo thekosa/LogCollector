@@ -2,6 +2,7 @@ package wat.inz.kolektorlogow;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import android.content.Context;
 
@@ -14,36 +15,65 @@ import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
+import java.util.concurrent.CountDownLatch;
+
 import wat.inz.kolektorlogow.DAO.FirestoreDeviceDAO;
 import wat.inz.kolektorlogow.meta.FirestoreDevice;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class IntegrationDeviceDAOTests {
-    private FirebaseFirestore connection;
-    private Context context;
-    private FirestoreDevice firestoreDevice;
     private FirestoreDeviceDAO firestoreDeviceDAO;
 
     @Before
     public void setUp() {
-        connection = FirebaseFirestore.getInstance();
-        context = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        firestoreDevice = new FirestoreDevice(context);
+        FirebaseFirestore connection = FirebaseFirestore.getInstance();
+        Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        FirestoreDevice firestoreDevice = new FirestoreDevice(context);
         firestoreDeviceDAO = new FirestoreDeviceDAO(connection, firestoreDevice);
     }
 
     @Test
-    public void test1_beforeRegisterDeviceToFirestore() throws InterruptedException {
-        assertEquals(1, firestoreDeviceDAO.findAllDevices());
+    public void test1_beforeRegisterDeviceToFirestore() {
+        CountDownLatch latch = new CountDownLatch(1);
+        firestoreDeviceDAO.findAllDevices(result -> {
+            assertEquals(1, (int) result);
+            latch.countDown();
+        });
+
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            fail();
+        }
     }
 
     @Test
-    public void test2_registerDeviceToFirestore() throws InterruptedException {
-        assertTrue(firestoreDeviceDAO.registerDevice());
+    public void test2_registerDeviceToFirestore() {
+        CountDownLatch latch = new CountDownLatch(1);
+        firestoreDeviceDAO.registerDevice(result -> {
+            assertTrue(result);
+            latch.countDown();
+        });
+
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            fail();
+        }
     }
 
     @Test
     public void test3_afterRegisterDeviceToFirestore() {
-        assertEquals(2, firestoreDeviceDAO.findAllDevices());
+        CountDownLatch latch = new CountDownLatch(1);
+        firestoreDeviceDAO.findAllDevices(result -> {
+            assertEquals(2, (int) result);
+            latch.countDown();
+        });
+
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            fail();
+        }
     }
 }
