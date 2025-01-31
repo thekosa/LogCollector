@@ -132,6 +132,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
+        if (!checkNetwork()) {
+            return;
+        }
 
         FirestoreDeviceDAO deviceDAO = new FirestoreDeviceDAO(dbConnection, new FirestoreDevice(this));
         deviceDAO.ifDeviceExist(result -> {
@@ -159,6 +162,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         refreshPermissions();
+        checkNetwork();
     }
 
     @Override
@@ -185,6 +189,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void onRefreshLogsListButtonClick(View view) {
         refreshPermissions();
+        checkNetwork();
         refreshLogList();
         collectorLogs.sortOutLogs(collectorLogsSort);
         collectorLogsFiltered.setLogsList(collectorLogs.filterOutLogs(collectorLogsFilter));
@@ -223,6 +228,35 @@ public class MainActivity extends AppCompatActivity {
         priorityColumnVisibilityCheckBox.setChecked(true);
         tagColumnVisibilityCheckBox.setChecked(true);
         messageColumnVisibilityCheckBox.setChecked(true);
+    }
+
+    //source: best answer added by Alex Mamo
+    //https://stackoverflow.com/questions/52279144/how-to-verify-if-user-has-network-access-and-show-a-pop-up-alert-when-there-isn
+    private boolean isNetworkAvailable() {
+        Runtime runtime = Runtime.getRuntime();
+        try {
+            Process process = runtime.exec("/system/bin/ping -c 1 8.8.8.8");
+            int exitValue = process.waitFor();
+            return (exitValue == 0);
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    private boolean checkNetwork() {
+        TextView offlineTextView = findViewById(R.id.offline_textview);
+        if (!isNetworkAvailable()) {
+            Toast.makeText(this, "Brak połączenia z internetem", Toast.LENGTH_LONG).show();
+            offlineTextView.setVisibility(View.VISIBLE);
+            refreshLogListButton.setText("odśwież bez zapisu w bazie");
+            refreshLogListButton.setEnabled(true);
+            return false;
+        }else{
+            offlineTextView.setVisibility(View.INVISIBLE);
+            refreshLogListButton.setText("odśwież");
+            return true;
+        }
     }
 
     @SuppressLint("SetTextI18n")
