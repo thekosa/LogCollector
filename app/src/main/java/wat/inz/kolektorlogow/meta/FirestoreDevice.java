@@ -17,4 +17,9 @@ public @Getter class FirestoreDevice {
         this.name = Build.MANUFACTURER + " " + Build.MODEL;
         this.identifier = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
     }
+
+    public FirestoreDevice(String name, String identifier) {
+        this.name = name;
+        this.identifier = identifier;
+    }
 }

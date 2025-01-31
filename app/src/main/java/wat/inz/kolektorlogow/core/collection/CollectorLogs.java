@@ -34,7 +34,7 @@ public @Data class CollectorLogs {
                     if (logCount++ < 2000) {
                         logsList.add(log);
                     }
-                    firestoreLogDAO.saveLog(new FirestoreLog(log));
+                    firestoreLogDAO.saveLog(new FirestoreLog(log), null);
                 }
             }
         } catch (IOException e) {

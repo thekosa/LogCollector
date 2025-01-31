@@ -34,12 +34,14 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
+import lombok.Getter;
 import rikka.shizuku.Shizuku;
 import wat.inz.kolektorlogow.DAO.FirestoreDeviceDAO;
 import wat.inz.kolektorlogow.DAO.FirestoreLogDAO;
 import wat.inz.kolektorlogow.R;
 import wat.inz.kolektorlogow.core.collection.CollectorLogs;
 import wat.inz.kolektorlogow.core.log.CollectorLog;
+import wat.inz.kolektorlogow.core.log.FirestoreLog;
 import wat.inz.kolektorlogow.core.modifiers.CollectorLogsFilter;
 import wat.inz.kolektorlogow.core.modifiers.CollectorLogsSort;
 import wat.inz.kolektorlogow.meta.FirestoreDevice;
@@ -71,8 +73,8 @@ public class MainActivity extends AppCompatActivity {
     private CheckBox priorityColumnVisibilityCheckBox;
     private CheckBox tagColumnVisibilityCheckBox;
     private CheckBox messageColumnVisibilityCheckBox;
+    @Getter
     private TextView permissionLevelTextView;
-
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -124,9 +126,31 @@ public class MainActivity extends AppCompatActivity {
         priorityMap.put("*", null);
 
         dbConnection = FirebaseFirestore.getInstance();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+
         FirestoreDeviceDAO deviceDAO = new FirestoreDeviceDAO(dbConnection, new FirestoreDevice(this));
-        deviceDAO.ifDeviceExists(() -> deviceDAO.registerDevice());
-        new FirestoreLogDAO(dbConnection).setOrdinalNumber(() -> refreshLogListButton.setEnabled(true));
+        deviceDAO.ifDeviceExist(result -> {
+            if (result == 0) {
+                deviceDAO.registerDevice(this::doNothing);
+            } else if (result == -1) {
+                Toast.makeText(this, "Sprawdź połączenie z internetem", Toast.LENGTH_LONG).show();
+            }
+        });
+
+
+        new FirestoreLogDAO(dbConnection).findMaxOrdinalNumber(result -> {
+            if (result == -1) {
+                Toast.makeText(this, "Sprawdź połączenie z internetem", Toast.LENGTH_LONG).show();
+            } else {
+                FirestoreLog.setStaticOrdinalNumber(result);
+                refreshLogListButton.setEnabled(true);
+            }
+        });
 
         refreshPermissions();
     }
@@ -202,7 +226,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @SuppressLint("SetTextI18n")
-    private void refreshPermissions() {
+    public void refreshPermissions() {
         shizukuCheckPermission();
         RootBeer rootBeer = new RootBeer(this);
         if (rootBeer.isRooted()) {
@@ -218,6 +242,16 @@ public class MainActivity extends AppCompatActivity {
             permissionLevelTextView.setText("Zwykły użytkownik");
             ifADB = false;
         }
+    }
+
+    public BufferedReader gatherLogs() throws IOException {
+        Process process;
+        if (ifADB) {
+            process = Shizuku.newProcess(logcatCommand.split(" "), null, null);
+        } else {
+            process = Runtime.getRuntime().exec(logcatCommand);
+        }
+        return new BufferedReader(new InputStreamReader(process.getInputStream()));
     }
 
     private void shizukuCheckPermission() {
@@ -287,18 +321,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void refreshLogList() {
         try {
-            Process process;
-            if (ifADB) {
-                process = Shizuku.newProcess(logcatCommand.split(" "), null, null);
-            } else {
-                process = Runtime.getRuntime().exec(logcatCommand);
-            }
-
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            BufferedReader bufferedReader = gatherLogs();
             collectorLogs.destroyLogsList();
             collectorLogs.generateLogs(bufferedReader, dbConnection);
             bufferedReader.close();
-
             Runtime.getRuntime().exec("logcat -c");
         } catch (IOException e) {
             String err = "Błąd polecenia logcat. ";
@@ -306,5 +332,8 @@ public class MainActivity extends AppCompatActivity {
             Log.e(this.getPackageName(), err, e);
             System.err.println(err + e);
         }
+    }
+
+    private void doNothing(Object object) {
     }
 }

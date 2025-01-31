@@ -1,48 +1,65 @@
+
 package wat.inz.kolektorlogow.DAO;
 
 import android.os.Build;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
+
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
+import java.util.function.Consumer;
+
 import wat.inz.kolektorlogow.core.log.FirestoreLog;
 
 public class FirestoreLogDAO {
-    private final FirebaseFirestore connection;
+    private final CollectionReference collectionReference;
+    private final String deviceName;
 
     public FirestoreLogDAO(FirebaseFirestore connection) {
-        this.connection = connection;
+        this.deviceName = Build.MANUFACTURER + " " + Build.MODEL;
+        this.collectionReference = connection.collection(deviceName);
     }
 
-    public void saveLog(FirestoreLog log) {
-        connection
-                .collection(Build.MANUFACTURER + " " + Build.MODEL)
+    public FirestoreLogDAO(FirebaseFirestore connection, String deviceName) {
+        this.deviceName = deviceName;
+        this.collectionReference = connection.collection(this.deviceName);
+    }
+
+    public void saveLog(FirestoreLog log, @Nullable Runnable callback) {
+        collectionReference
                 .add(log)
-                .addOnSuccessListener(a -> Log.d("OgnistyMagazyn", "Log o tagu " + log.getTag() + " zapisany"))
-                .addOnFailureListener(a -> Log.e("OgnistyMagazyn", "Log o tagu " + log.getTag() + " nie zapisany"));
+                .addOnSuccessListener(a -> {
+                    Log.d("OgnistyMagazyn", "Log o tagu " + log.getTag() + " zapisany");
+                    if (callback != null) {
+                        callback.run();
+                    }
+                })
+                .addOnFailureListener(a -> {
+                    Log.e("OgnistyMagazyn", "Log o tagu " + log.getTag() + " nie zapisany");
+                    if (callback != null) {
+                        callback.run();
+                    }
+                });
     }
 
-    public void setOrdinalNumber(Runnable callback) {
-        String deviceName = Build.MANUFACTURER + " " + Build.MODEL;
-
-        CollectionReference collectionRef = connection.collection(deviceName);
-        Query query = collectionRef
+    public void findMaxOrdinalNumber(Consumer<Long> callback) {
+        collectionReference
                 .orderBy("ordinalNumber", Query.Direction.DESCENDING)
-                .limit(1);
-
-        query.get().addOnSuccessListener(queryDocumentSnapshots -> {
-            if (queryDocumentSnapshots.isEmpty()) {
-                FirestoreLog.setStaticOrdinalNumber(0);
-            } else {
-                Object maxOrdinalNnumber = queryDocumentSnapshots.getDocuments().get(0).get("ordinalNumber");
-                FirestoreLog.setStaticOrdinalNumber(maxOrdinalNnumber == null ? 0 : (long) maxOrdinalNnumber);
-            }
-            callback.run();
-        }).addOnFailureListener(e -> {
-            Log.e("OgnistyMagazyn", "Błąd podczas pobierania maksymalnej wartości liczby porządkowej z kolekcji" + deviceName, e);
-            callback.run();
-        });
+                .limit(1)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    Object maxNumber = queryDocumentSnapshots.getDocuments().get(0).get("ordinalNumber");
+                    if (maxNumber != null) {
+                        callback.accept((long) maxNumber);
+                    } else {
+                        callback.accept((long) 0);
+                    }
+                }).addOnFailureListener(e -> {
+                    Log.e("OgnistyMagazyn", "Błąd podczas pobierania maksymalnej wartości liczby porządkowej z kolekcji" + deviceName, e);
+                    callback.accept((long) -1);
+                });
     }
 }
