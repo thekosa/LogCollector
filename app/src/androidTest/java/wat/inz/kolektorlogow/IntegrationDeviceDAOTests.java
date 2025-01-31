@@ -10,6 +10,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -35,8 +36,8 @@ public class IntegrationDeviceDAOTests {
     @Test
     public void test1_beforeRegisterDeviceToFirestore() {
         CountDownLatch latch = new CountDownLatch(1);
-        firestoreDeviceDAO.findAllDevices(result -> {
-            assertEquals(1, (int) result);
+        firestoreDeviceDAO.ifDeviceExist(result -> {
+            assertEquals(0, (int) result);
             latch.countDown();
         });
 
@@ -65,8 +66,8 @@ public class IntegrationDeviceDAOTests {
     @Test
     public void test3_afterRegisterDeviceToFirestore() {
         CountDownLatch latch = new CountDownLatch(1);
-        firestoreDeviceDAO.findAllDevices(result -> {
-            assertEquals(2, (int) result);
+        firestoreDeviceDAO.ifDeviceExist(result -> {
+            assertEquals(1, (int) result);
             latch.countDown();
         });
 

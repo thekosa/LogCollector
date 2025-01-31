@@ -18,6 +18,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import rikka.shizuku.Shizuku;
@@ -29,20 +30,23 @@ import wat.inz.kolektorlogow.main.MainActivity;
 
 @RunWith(AndroidJUnit4.class)
 public class ComponentsTests {
-    @UiThreadTest
     @Test
-    public void gatherLogs() {
+    public void gatherLogsIntoList() {
         Handler handler = new Handler(Looper.getMainLooper());
         handler.post(() -> {
             MainActivity mainActivity = new MainActivity();
-            BufferedReader bufferedReader = mainActivity.refreshLogList("logcat -d");
+            BufferedReader bufferedReader;
+            try {
+                bufferedReader = mainActivity.gatherLogs();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
             CollectorLogs collectorLogs = new CollectorLogs();
             collectorLogs.generateLogs(bufferedReader, null);
             assertFalse(collectorLogs.getLogsList().isEmpty());
         });
     }
 
-    @UiThreadTest
     @Test
     public void androidPersmissionsCheck() {
         Handler handler = new Handler(Looper.getMainLooper());

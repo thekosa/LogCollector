@@ -4,6 +4,8 @@ package wat.inz.kolektorlogow.DAO;
 import android.os.Build;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
+
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
@@ -26,11 +28,21 @@ public class FirestoreLogDAO {
         this.collectionReference = connection.collection(this.deviceName);
     }
 
-    public void saveLog(FirestoreLog log) {
+    public void saveLog(FirestoreLog log, @Nullable Runnable callback) {
         collectionReference
                 .add(log)
-                .addOnSuccessListener(a -> Log.d("OgnistyMagazyn", "Log o tagu " + log.getTag() + " zapisany"))
-                .addOnFailureListener(a -> Log.e("OgnistyMagazyn", "Log o tagu " + log.getTag() + " nie zapisany"));
+                .addOnSuccessListener(a -> {
+                    Log.d("OgnistyMagazyn", "Log o tagu " + log.getTag() + " zapisany");
+                    if (callback != null) {
+                        callback.run();
+                    }
+                })
+                .addOnFailureListener(a -> {
+                    Log.e("OgnistyMagazyn", "Log o tagu " + log.getTag() + " nie zapisany");
+                    if (callback != null) {
+                        callback.run();
+                    }
+                });
     }
 
     public void findMaxOrdinalNumber(Consumer<Long> callback) {

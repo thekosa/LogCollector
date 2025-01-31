@@ -128,20 +128,11 @@ public class MainActivity extends AppCompatActivity {
         dbConnection = FirebaseFirestore.getInstance();
     }
 
-    private static void doNothing(int i) {
-
-    }
-
     @Override
     protected void onStart() {
         super.onStart();
-        TextView offlineTextView = findViewById(R.id.offline_textview);
 
-        if (!isNetworkAvailable()) {
-            Toast.makeText(this, "Brak połączenia z internetem", Toast.LENGTH_LONG).show();
-            offlineTextView.setVisibility(View.VISIBLE);
-            refreshLogListButton.setText("odśwież bez zapisu w bazie");
-            refreshLogListButton.setEnabled(true);
+        if (!checkNetwork()) {
             return;
         }
 
@@ -171,6 +162,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         refreshPermissions();
+        checkNetwork();
     }
 
     @Override
@@ -197,6 +189,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void onRefreshLogsListButtonClick(View view) {
         refreshPermissions();
+        checkNetwork();
         refreshLogList();
         collectorLogs.sortOutLogs(collectorLogsSort);
         collectorLogsFiltered.setLogsList(collectorLogs.filterOutLogs(collectorLogsFilter));
@@ -251,6 +244,21 @@ public class MainActivity extends AppCompatActivity {
         return false;
     }
 
+    private boolean checkNetwork() {
+        TextView offlineTextView = findViewById(R.id.offline_textview);
+        if (!isNetworkAvailable()) {
+            Toast.makeText(this, "Brak połączenia z internetem", Toast.LENGTH_LONG).show();
+            offlineTextView.setVisibility(View.VISIBLE);
+            refreshLogListButton.setText("odśwież bez zapisu w bazie");
+            refreshLogListButton.setEnabled(true);
+            return false;
+        }else{
+            offlineTextView.setVisibility(View.INVISIBLE);
+            refreshLogListButton.setText("odśwież");
+            return true;
+        }
+    }
+
     @SuppressLint("SetTextI18n")
     public void refreshPermissions() {
         shizukuCheckPermission();
@@ -268,6 +276,16 @@ public class MainActivity extends AppCompatActivity {
             permissionLevelTextView.setText("Zwykły użytkownik");
             ifADB = false;
         }
+    }
+
+    public BufferedReader gatherLogs() throws IOException {
+        Process process;
+        if (ifADB) {
+            process = Shizuku.newProcess(logcatCommand.split(" "), null, null);
+        } else {
+            process = Runtime.getRuntime().exec(logcatCommand);
+        }
+        return new BufferedReader(new InputStreamReader(process.getInputStream()));
     }
 
     private void shizukuCheckPermission() {
@@ -335,34 +353,12 @@ public class MainActivity extends AppCompatActivity {
         return cell;
     }
 
-    public BufferedReader refreshLogList(String logcatCommand) {
-        try {
-            Process process = Runtime.getRuntime().exec(logcatCommand);
-
-            return new BufferedReader(new InputStreamReader(process.getInputStream()));
-
-        } catch (IOException e) {
-            String err = "Błąd polecenia logcat. ";
-            Toast.makeText(this, err, Toast.LENGTH_SHORT).show();
-            Log.e(this.getPackageName(), err, e);
-        }
-        return null;
-    }
-
     private void refreshLogList() {
         try {
-            Process process;
-            if (ifADB) {
-                process = Shizuku.newProcess(logcatCommand.split(" "), null, null);
-            } else {
-                process = Runtime.getRuntime().exec(logcatCommand);
-            }
-
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            BufferedReader bufferedReader = gatherLogs();
             collectorLogs.destroyLogsList();
             collectorLogs.generateLogs(bufferedReader, dbConnection);
             bufferedReader.close();
-
             Runtime.getRuntime().exec("logcat -c");
         } catch (IOException e) {
             String err = "Błąd polecenia logcat. ";
