@@ -51,9 +51,11 @@ public class FirestoreLogDAO {
                 .limit(1)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
-                    Object maxNumber = queryDocumentSnapshots.getDocuments().get(0).get("ordinalNumber");
-                    if (maxNumber != null) {
-                        callback.accept((long) maxNumber);
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        Long maxNumber = queryDocumentSnapshots.getDocuments().get(0).getLong("ordinalNumber");
+                        if (maxNumber != null) {
+                            callback.accept(maxNumber);
+                        }
                     } else {
                         callback.accept((long) 0);
                     }
