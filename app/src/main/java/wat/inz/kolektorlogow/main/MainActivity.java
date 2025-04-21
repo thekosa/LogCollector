@@ -1,7 +1,6 @@
 package wat.inz.kolektorlogow.main;
 
 import android.annotation.SuppressLint;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
@@ -26,32 +25,26 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.scottyab.rootbeer.RootBeer;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
 import lombok.Getter;
-import rikka.shizuku.Shizuku;
-import wat.inz.kolektorlogow.DAO.FirestoreDeviceDAO;
-import wat.inz.kolektorlogow.DAO.FirestoreLogDAO;
 import wat.inz.kolektorlogow.R;
 import wat.inz.kolektorlogow.core.collection.CollectorLogs;
 import wat.inz.kolektorlogow.core.log.CollectorLog;
-import wat.inz.kolektorlogow.core.log.FirestoreLog;
 import wat.inz.kolektorlogow.core.modifiers.CollectorLogsFilter;
 import wat.inz.kolektorlogow.core.modifiers.CollectorLogsSort;
-import wat.inz.kolektorlogow.meta.FirestoreDevice;
+import wat.inz.kolektorlogow.logic.CommandExecutor;
+import wat.inz.kolektorlogow.logic.FirestoreRepository;
+import wat.inz.kolektorlogow.logic.PermissionManager;
 
 
 public class MainActivity extends AppCompatActivity {
-    private FirebaseFirestore dbConnection;
     private Button refreshLogListButton;
     private TableLayout logsListTableLayout;
-    private String logcatCommand;
     private CollectorLogs collectorLogs;
     private CollectorLogs collectorLogsFiltered;
     private DrawerLayout drawerLayout;
@@ -61,7 +54,6 @@ public class MainActivity extends AppCompatActivity {
     private EditText tagFilterEditText;
     private EditText pidFilterEditText;
     private EditText tidFilterEditText;
-    private boolean ifADB = false;
     private CollectorLogsFilter collectorLogsFilter;
     private CollectorLogsSort collectorLogsSort;
     private Map<String, String> priorityMap;
@@ -75,6 +67,10 @@ public class MainActivity extends AppCompatActivity {
     private CheckBox messageColumnVisibilityCheckBox;
     @Getter
     private TextView permissionLevelTextView;
+
+    private PermissionManager permissionManager;
+    private CommandExecutor commandExecutor;
+    private FirestoreRepository firestoreRepository;
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -110,7 +106,6 @@ public class MainActivity extends AppCompatActivity {
         tagColumnVisibilityCheckBox.setChecked(true);
         messageColumnVisibilityCheckBox.setChecked(true);
 
-        logcatCommand = "logcat -d -v year";
         collectorLogs = new CollectorLogs();
         collectorLogsFiltered = new CollectorLogs();
         collectorLogsFilter = new CollectorLogsFilter(null, null, null, null);
@@ -125,43 +120,31 @@ public class MainActivity extends AppCompatActivity {
         priorityMap.put("Fatal", "F");
         priorityMap.put("*", null);
 
-        dbConnection = FirebaseFirestore.getInstance();
+
+        permissionManager = new PermissionManager();
+        commandExecutor = new CommandExecutor();
+        commandExecutor.setLogcatCommand("logcat -d -v year");
+        firestoreRepository = new FirestoreRepository(FirebaseFirestore.getInstance());
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-
         if (!checkNetwork()) {
             return;
         }
-
-        FirestoreDeviceDAO deviceDAO = new FirestoreDeviceDAO(dbConnection, new FirestoreDevice(this));
-        deviceDAO.ifDeviceExist(result -> {
-            if (result == 0) {
-                deviceDAO.registerDevice(this::doNothing);
-            } else if (result == -1) {
-                Toast.makeText(this, "Sprawdź połączenie z internetem", Toast.LENGTH_LONG).show();
-            }
-        });
-
-
-        new FirestoreLogDAO(dbConnection).findMaxOrdinalNumber(result -> {
-            if (result == -1) {
-                Toast.makeText(this, "Sprawdź połączenie z internetem", Toast.LENGTH_LONG).show();
-            } else {
-                FirestoreLog.setStaticOrdinalNumber(result);
-                refreshLogListButton.setEnabled(true);
-            }
-        });
-
-        refreshPermissions();
+        firestoreRepository.checkDeviceExist(this);
+        if (firestoreRepository.checkOrdinalNumber(this)) {
+            refreshLogListButton.setEnabled(true);
+        }
+        refreshPermissionLevelTextView();
     }
+
 
     @Override
     protected void onResume() {
         super.onResume();
-        refreshPermissions();
+        refreshPermissionLevelTextView();
         checkNetwork();
     }
 
@@ -188,7 +171,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onRefreshLogsListButtonClick(View view) {
-        refreshPermissions();
+        refreshPermissionLevelTextView();
         checkNetwork();
         refreshLogList();
         collectorLogs.sortOutLogs(collectorLogsSort);
@@ -230,29 +213,15 @@ public class MainActivity extends AppCompatActivity {
         messageColumnVisibilityCheckBox.setChecked(true);
     }
 
-    //source: best answer added by Alex Mamo
-    //https://stackoverflow.com/questions/52279144/how-to-verify-if-user-has-network-access-and-show-a-pop-up-alert-when-there-isn
-    private boolean isNetworkAvailable() {
-        Runtime runtime = Runtime.getRuntime();
-        try {
-            Process process = runtime.exec("/system/bin/ping -c 1 8.8.8.8");
-            int exitValue = process.waitFor();
-            return (exitValue == 0);
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
     private boolean checkNetwork() {
         TextView offlineTextView = findViewById(R.id.offline_textview);
-        if (!isNetworkAvailable()) {
+        if (!permissionManager.isNetworkAvailable()) {
             Toast.makeText(this, "Brak połączenia z internetem", Toast.LENGTH_LONG).show();
             offlineTextView.setVisibility(View.VISIBLE);
             refreshLogListButton.setText("odśwież bez zapisu w bazie");
             refreshLogListButton.setEnabled(true);
             return false;
-        }else{
+        } else {
             offlineTextView.setVisibility(View.INVISIBLE);
             refreshLogListButton.setText("odśwież");
             return true;
@@ -260,41 +229,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @SuppressLint("SetTextI18n")
-    public void refreshPermissions() {
-        shizukuCheckPermission();
-        RootBeer rootBeer = new RootBeer(this);
-        if (rootBeer.isRooted()) {
+    public void refreshPermissionLevelTextView() {
+        permissionManager.checkShizuku(this);
+        if (permissionManager.isRooted(this)) {
             permissionLevelTextView.setTextColor(Color.RED);
             permissionLevelTextView.setText("root");
-            ifADB = false;
-        } else if (Shizuku.pingBinder() && Shizuku.getUid() == 2000) {
+            permissionManager.setADBcheck(false);
+        } else if (permissionManager.isADB()) {
             permissionLevelTextView.setTextColor(Color.GREEN);
             permissionLevelTextView.setText("ADB");
-            ifADB = true;
+            permissionManager.setADBcheck(true);
         } else {
             permissionLevelTextView.setTextColor(Color.BLUE);
             permissionLevelTextView.setText("Zwykły użytkownik");
-            ifADB = false;
-        }
-    }
-
-    public BufferedReader gatherLogs() throws IOException {
-        Process process;
-        if (ifADB) {
-            process = Shizuku.newProcess(logcatCommand.split(" "), null, null);
-        } else {
-            process = Runtime.getRuntime().exec(logcatCommand);
-        }
-        return new BufferedReader(new InputStreamReader(process.getInputStream()));
-    }
-
-    private void shizukuCheckPermission() {
-        try {
-            if (Shizuku.checkSelfPermission() != PackageManager.PERMISSION_GRANTED) {
-                Shizuku.requestPermission(0);
-            }
-        } catch (IllegalStateException e) {
-            Toast.makeText(this, "Włącz Shizuku", Toast.LENGTH_SHORT).show();
+            permissionManager.setADBcheck(false);
         }
     }
 
@@ -355,19 +303,16 @@ public class MainActivity extends AppCompatActivity {
 
     private void refreshLogList() {
         try {
-            BufferedReader bufferedReader = gatherLogs();
+            BufferedReader bufferedReader = commandExecutor.gatherLogs(permissionManager);
             collectorLogs.destroyLogsList();
-            collectorLogs.generateLogs(bufferedReader, dbConnection);
+            collectorLogs.generateLogs(bufferedReader, firestoreRepository);
             bufferedReader.close();
-            Runtime.getRuntime().exec("logcat -c");
+            commandExecutor.cleanBuffer();
         } catch (IOException e) {
             String err = "Błąd polecenia logcat. ";
             Toast.makeText(this, err, Toast.LENGTH_SHORT).show();
             Log.e(this.getPackageName(), err, e);
             System.err.println(err + e);
         }
-    }
-
-    private void doNothing(Object object) {
     }
 }

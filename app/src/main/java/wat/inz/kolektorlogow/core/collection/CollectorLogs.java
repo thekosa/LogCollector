@@ -2,19 +2,17 @@ package wat.inz.kolektorlogow.core.collection;
 
 import android.util.Log;
 
-import com.google.firebase.firestore.FirebaseFirestore;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import lombok.Data;
-import wat.inz.kolektorlogow.DAO.FirestoreLogDAO;
 import wat.inz.kolektorlogow.core.log.CollectorLog;
 import wat.inz.kolektorlogow.core.log.FirestoreLog;
 import wat.inz.kolektorlogow.core.modifiers.CollectorLogsFilter;
 import wat.inz.kolektorlogow.core.modifiers.CollectorLogsSort;
+import wat.inz.kolektorlogow.logic.FirestoreRepository;
 
 public @Data class CollectorLogs {
     private List<CollectorLog> logsList;
@@ -23,10 +21,9 @@ public @Data class CollectorLogs {
         logsList = new ArrayList<>();
     }
 
-    public void generateLogs(BufferedReader stream, FirebaseFirestore dbConnection) {
+    public void generateLogs(BufferedReader stream, FirestoreRepository firestoreRepository) {
         try {
             int logCount = 0;
-            FirestoreLogDAO firestoreLogDAO = new FirestoreLogDAO(dbConnection);
             for (String logLine = stream.readLine(); logLine != null; logLine = stream.readLine()) {
                 CollectorLog log = new CollectorLog(logLine);
                 if (!log.isEmpty()) {
@@ -34,7 +31,7 @@ public @Data class CollectorLogs {
                     if (logCount++ < 2000) {
                         logsList.add(log);
                     }
-                    firestoreLogDAO.saveLog(new FirestoreLog(log), null);
+                    firestoreRepository.saveFirestoreLog(new FirestoreLog(log), null);
                 }
             }
         } catch (IOException e) {
